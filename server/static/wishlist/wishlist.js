@@ -60,6 +60,8 @@ function createDiv(item) {
         .addEventListener("click", handleDelete)
     clone.querySelector(".stashlist-btn-copy")
         .addEventListener("click", () => navigator.clipboard.writeText(searchQuery))
+    clone.querySelector(".stashlist-btn-hide")
+        .addEventListener("click", (e) => e.target.closest("[data-stash-id]").classList.toggle("hidden"))
     document.getElementById("fav-list")
         .appendChild(clone)
 }

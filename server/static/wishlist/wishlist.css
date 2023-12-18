@@ -60,3 +60,6 @@ input[type='checkbox'] {
 .scene-performer:not(:last-child)::after {
     content: ' | ';
 }
+.hidden {
+    display: none;
+}
