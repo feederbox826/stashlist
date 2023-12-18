@@ -95,10 +95,10 @@ async function testApis() {
     const mongoOK = await fetch(`${mongoApi.host}/api/stash?auth=${mongoApi.apikey}`)
         .then(response => response.ok)
         .catch(error => false);
-    const stashOK = await fetch(`${stashDB.host}?query={ query Me { me { id } } }`, { headers: { ApiKey: stashDB.apikey } })
+    const stashOK = await fetch(`${stashDB.host}?query=query Me { me { id } }`, { headers: { ApiKey: stashDB.apikey } })
         .then(response => response.ok)
         .catch(error => false);
-    const localStashOK = await fetch(`${localStash.host}?query={ query Version { version { version } } }`, { headers: { ApiKey: localStash.apikey } })
+    const localStashOK = await fetch(`${localStash.host}?query=query Version { version { version } }`, { headers: { ApiKey: localStash.apikey } })
         .then(response => response.ok)
         .catch(error => false);
     const placeholder = document.getElementById("placeholder");
