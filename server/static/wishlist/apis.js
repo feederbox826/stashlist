@@ -5,7 +5,7 @@ function gqlClient(instance, query, variables) {
         headers: { "ApiKey": instance.apikey },
     }
     const params = new URLSearchParams({ query: query.replace(/\++/, '+'), variables: JSON.stringify(variables) });
-    return fetch(`${instance.host}/graphql?${params}`, options)
+    return fetch(`${instance.host}?${params}`, options)
         .then((response) => response.json())
         .then((data) => data.data);
 }
