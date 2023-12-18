@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html><head>
+  <title>stash wishlist config</title>
+  <style>
+    html, input {
+      background: #000;
+      color: #ddd;
+      border-color: #ddd;
+      font-size: 1em;
+    }
+    .hero {
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <pre id="config" class="hero" style="width: 50vw;">
+    <label for="mongo_host">mongo-api host</label>
+    <input type="text" id="mongo_host" value="">
+    <label for="mongo_apikey">mongo-api auth key</label>
+    <input type="text" id="mongo_apikey" value="">
+    <label for="stashdb_host">stashdb GQL endpoint</label>
+    <input type="text" id="stashdb_host" value="">
+    <label for="stashdb_apikey">stashdb GQL key</label>
+    <input type="text" id="stashdb_apikey" value="">
+    <label for="jackett_host">jackett URL</label>
+    <input type="text" id="jackett_host" value="">
+    <label for="localstash_host">local stash GQL endpoint</label>
+    <input type="text" id="localstash_host" value="">
+    <label for="localstash_apikey">local stash auth key</label>
+    <input type="text" id="localstash_apikey" value="">
+    <input type="button" id="save" value="Save" onclick="save_input()">
+  </pre>
+  <script>
+    function load_localstorage() {
+        var mongo_host = localStorage.getItem("mongo_host");
+        var mongo_apikey = localStorage.getItem("mongo_apikey");
+        var stashdb_host = localStorage.getItem("stashdb_host");
+        var stashdb_apikey = localStorage.getItem("stashdb_apikey");
+        var jackett_host = localStorage.getItem("jackett_host");
+        var localstash_host = localStorage.getItem("localstash_host");
+        var localstash_apikey = localStorage.getItem("localstash_apikey");
+        document.getElementById("mongo_host").value = mongo_host ?? "https://mongo.example.com/api/stash";
+        document.getElementById("mongo_apikey").value = mongo_apikey;
+        document.getElementById("stashdb_host").value = stashdb_host ?? "https://stashdb.org/graphql";
+        document.getElementById("stashdb_apikey").value = stashdb_apikey;
+        document.getElementById("jackett_host").value = jackett_host ?? "https://jackett.example.com/UI/Dashboard";
+        document.getElementById("localstash_host").value = localstash_host ?? "http://localhost:9999/graphql";
+        document.getElementById("localstash_apikey").value = localstash_apikey;
+    }
+    function save_input() {
+        var mongo_host = document.getElementById("mongo_host").value;
+        var mongo_apikey = document.getElementById("mongo_apikey").value;
+        var stashdb_host = document.getElementById("stashdb_host").value;
+        var stashdb_apikey = document.getElementById("stashdb_apikey").value;
+        var jackett_host = document.getElementById("jackett_host").value;
+        var localstash_host = document.getElementById("localstash_host").value;
+        var localstash_apikey = document.getElementById("localstash_apikey").value;
+        localStorage.setItem("mongo_host", mongo_host);
+        localStorage.setItem("mongo_apikey", mongo_apikey);
+        localStorage.setItem("stashdb_host", stashdb_host);
+        localStorage.setItem("stashdb_apikey", stashdb_apikey);
+        localStorage.setItem("jackett_host", jackett_host);
+        localStorage.setItem("localstash_host", localstash_host);
+        localStorage.setItem("localstash_apikey", localstash_apikey);
+        alert("Saved!");
+    }
+    load_localstorage();
+  </script>
+</body></html>

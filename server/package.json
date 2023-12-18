@@ -1,0 +1,16 @@
+{
+	"name": "mongo-api",
+	"version": "1.0.0",
+	"main": "server.js",
+	"dependencies": {
+		"@fastify/cors": "^8.4.2",
+		"@fastify/mongodb": "^8.0.0",
+		"@fastify/static": "^6.12.0",
+		"dotenv": "^16.3.1",
+		"fastify": "^4.25.1"
+	},
+	"scripts": {
+		"start": "node server.js"
+	},
+	"private": true
+}

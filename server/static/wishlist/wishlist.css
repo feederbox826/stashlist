@@ -1,0 +1,62 @@
+#card-template {
+    display: none;
+}
+#fav-list {
+    padding: 16px;
+}
+#placeholder {
+    font-size: 20px;
+}
+@media (min-width: 1200px) {
+    #fav-list {
+        column-count: 2;
+    }
+}
+@media (min-width: 1800px) {
+    #fav-list {
+        column-count: 3;
+    }
+}
+@media (max-width: 1200px) {
+    #fav-list {
+        column-count: 1;
+        width: 95vw;
+    }
+    .scene-info .card {
+        width: 100%;
+    }
+}
+.scene-info, .card {
+    margin-top: 0px !important;
+}
+.ScenePhoto {
+    width: 100% !important;
+}
+.scene-description {
+    padding: 16px 0px;
+    white-space: normal !important;
+}
+.description {
+    max-height: 0px;
+    overflow: hidden;
+    white-space: pre-line !important;
+    transition: max-height 0.2s ease-out;
+}
+input[type='checkbox'] {
+    display: none;
+}
+.label-toggle {
+    font-family: monospace;
+    cursor: pointer;
+}
+.label-toggle:has(>.toggle:checked) + .description {
+    max-height: 100vh;
+}
+.stashlist-buttonct {
+    display: flex;
+    flex-direction: row;
+    font-size: 20px;
+}
+.scene-performer:not(:last-child)::after {
+    content: ' | ';
+}

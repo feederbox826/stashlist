@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <title>stash wishlist</title>
+        <style>
+            @import url("https://stashdb.org/assets/index-0d163314.css");
+            @import url("wishlist.css");
+        </style>
+    </head>
+    <body>
+        <div id="fav-list">
+            <div id="placeholder">
+                If nothing loads, check your <a style="color: red;" href="/setup">setup</a>.
+            </div>
+        </div>
+        <div id="card-template" class="scene-info card">
+            <div class="card-header">
+                <div class="float-end stashlist-buttonct ">
+                    <a class="jackett-search" title="Jackett Search" target="_blank">🔎</a>
+                    <div class="stashlist-btn-remove">🗑️</div>
+                </div>
+                <h3>
+                    <a class="title-link">
+                        <span class="title"></span>
+                    </a>
+                </h3>
+                <h6>
+                    <a class="studio"></a>
+                    <span class="mx-1">•</span>
+                    <span class="release-date"></span>
+                </h6>
+            </div>
+            <div class="ScenePhoto card-body">
+                <div class="Image">
+                    <img class="Image-image">
+                </div>
+            </div>
+            <div class="scene-performers me-auto">
+            </div>
+            <div class="scene-description">
+                <label class="label-toggle">
+                    <input class="toggle" type="checkbox">
+                    🞂 Description
+                </label>
+                <div class="description"></div>
+            </div>
+        </div>
+        <script src="apis.js"></script>
+        <script src="wishlist.js"></script>
+    </body>
+</html>
