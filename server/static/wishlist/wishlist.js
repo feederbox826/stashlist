@@ -89,10 +89,10 @@ function queryLocalMultiple(sceneIDs) {
     })
 }
 async function testApis() {
-    const fetchTest = (url) => fetch(url).then(response => response.ok).catch(error => false)
+    const fetchTest = (url, headers) => fetch(url, { headers }).then(response => response.ok).catch(error => false)
     const mongoOK = await fetchTest(`${mongoApi.host}/test?auth=${mongoApi.apikey}`)
-    const stashOK = await fetchTest(`${stashDB.host}?query=query Me { me { id } }`, { headers: { ApiKey: stashDB.apikey } })
-    const localStashOK = await fetchTest(`${localStash.host}?query=query Version { version { version } }`, { headers: { ApiKey: localStash.apikey } })
+    const stashOK = await fetchTest(`${stashDB.host}?query=query Me { me { id } }`, { ApiKey: stashDB.apikey })
+    const localStashOK = await fetchTest(`${localStash.host}?query=query Version { version { version } }`, { ApiKey: localStash.apikey })
     const placeholder = document.getElementById("placeholder")
     function addWarning(name, status) {
         const warning = document.createElement("p")
