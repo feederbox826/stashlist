@@ -9,8 +9,8 @@ const mongoApi = {
 };
 const jackettUrl = localStorage.getItem("jackett_host")
 const localStash = {
-    apikey: localStorage.getItem("local_apikey"),
-    host: localStorage.getItem("local_host"),
+    apikey: localStorage.getItem("localstash_apikey"),
+    host: localStorage.getItem("localstash_host"),
 };
 
 function fetchStashDB(id) {
@@ -92,7 +92,7 @@ function queryLocalMultiple(sceneIDs) {
     });
 }
 async function testApis() {
-    const mongoOK = await fetch(`${mongoApi.host}/api/stash?auth=${mongoApi.apikey}`)
+    const mongoOK = await fetch(`${mongoApi.host}/test?auth=${mongoApi.apikey}`)
         .then(response => response.ok)
         .catch(error => false);
     const stashOK = await fetch(`${stashDB.host}?query=query Me { me { id } }`, { headers: { ApiKey: stashDB.apikey } })
