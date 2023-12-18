@@ -1,17 +1,17 @@
 // Description: Fetches wishlist from mongo and stashdb, and displays it on the page.
 const stashDB = {
     apikey: localStorage.getItem("stashdb_apikey"),
-    host: localStorage.getItem("stashdb_host"),
-};
+    host: localStorage.getItem("stashdb_host")
+}
 const mongoApi = {
     apikey: localStorage.getItem("mongo_apikey"),
-    host: localStorage.getItem("mongo_host"),
-};
+    host: localStorage.getItem("mongo_host")
+}
 const jackettUrl = localStorage.getItem("jackett_host")
 const localStash = {
     apikey: localStorage.getItem("localstash_apikey"),
-    host: localStorage.getItem("localstash_host"),
-};
+    host: localStorage.getItem("localstash_host")
+}
 
 function fetchStashDB(id) {
     const query = `query Scene($id: ID!) {
@@ -23,54 +23,52 @@ function fetchStashDB(id) {
     }}`
     return gqlClient(stashDB, query, { id })
         .then(data => data.findScene)
-};
+}
 const handleDelete = async (e) => {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    const card = e.target.closest("[data-stash-id]");
-    const stashid = card.getAttribute("data-stash-id");
-    if (confirm("Confirm delete?") == false) return;
-    await mongoApiDelete(stashid);
+    e.preventDefault()
+    e.stopImmediatePropagation()
+    const card = e.target.closest("[data-stash-id]")
+    const stashid = card.getAttribute("data-stash-id")
+    if (confirm("Confirm delete?") == false) return
+    await mongoApiDelete(stashid)
     card.remove()
-};
+}
 function createDiv(item) {
-    const template = document.querySelector("#card-template");
-    const clone = template.cloneNode(true);
-    clone.setAttribute("data-stash-id", item.id);
-    clone.id = "";
-    clone.querySelector(".title").textContent = item.title;
-    clone.querySelector(".title-link").href = `https://stashdb.org/scenes/${item.id}`;
-    clone.querySelector(".studio").textContent = item.studio.name;
-    clone.querySelector(".studio").href = `https://stashdb.org/studios/${item.studio.id}`;
-    clone.querySelector(".release-date").textContent = item.release_date;
-    clone.querySelector(".Image-image").src = item.images[0].url;
-    clone.querySelector(".description").textContent = item.details ?? "No description available";
+    const template = document.querySelector("#card-template")
+    const clone = template.cloneNode(true)
+    clone.id = ""
+    clone.setAttribute("data-stash-id", item.id)
+    clone.querySelector(".title").textContent = item.title
+    clone.querySelector(".title-link").href = `https://stashdb.org/scenes/${item.id}`
+    clone.querySelector(".studio").textContent = item.studio.name
+    clone.querySelector(".studio").href = `https://stashdb.org/studios/${item.studio.id}`
+    clone.querySelector(".release-date").textContent = item.release_date
+    clone.querySelector(".Image-image").src = item.images[0].url
+    clone.querySelector(".description").textContent = item.details ?? "No description available"
     // add performers
-    for (const performer of item.performers) {
-        const performerLink = document.createElement("a");
-        performerLink.classList.add("scene-performer");
-        performerLink.textContent = performer.performer.name;
-        performerLink.href = `https://stashdb.org/performers/${performer.performer.id}`;
-        clone.querySelector(".scene-performers").appendChild(performerLink);
-    }
-    // add jackett search
-    const searchQuery = `${item.studio.name} ${item.title}`.replace(" ", "+");
-    clone.querySelector(".jackett-search").href = `${jackettUrl}#search=${searchQuery}`
-    // add remove button
-    const removeButton = clone.querySelector(".stashlist-btn-remove");
-    removeButton.addEventListener("click", handleDelete)
-    const list = document.getElementById("fav-list");
-    list.appendChild(clone);
+    item.performers.forEach(performer => {
+        const performerLink = document.createElement("a")
+        performerLink.classList.add("scene-performer")
+        performerLink.textContent = performer.performer.name
+        performerLink.href = `https://stashdb.org/performers/${performer.performer.id}`
+        clone.querySelector(".scene-performers").appendChild(performerLink)
+    })
+    // add buttons
+    const searchQuery = `${item.studio.name} ${item.title}`
+    clone.querySelector(".jackett-search").href = `${jackettUrl}#search=${searchQuery.replace(" ", "+")}`
+    clone.querySelector(".stashlist-btn-remove")
+        .addEventListener("click", handleDelete)
+    clone.querySelector(".stashlist-btn-copy")
+        .addEventListener("click", () => navigator.clipboard.writeText(searchQuery))
+    document.getElementById("fav-list")
+        .appendChild(clone)
 }
-function fetchWishlist() {
+const fetchWishlist = () =>
     getWishList().then(data => {
-        data.forEach(item =>
-            fetchStashDB(item)
-                .then(dbItem => createDiv(dbItem))
-        )
-        queryLocalMultiple(data);
-        })
-}
+        data.forEach(item => fetchStashDB(item)
+            .then(dbItem => createDiv(dbItem)))
+        queryLocalMultiple(data)
+    })
 function queryLocal(sceneId) {
     const query = `query find($stash_id: String!) {
         findScenes(scene_filter:
@@ -78,42 +76,36 @@ function queryLocal(sceneId) {
                 { value: $stash_id modifier: EQUALS }
         })
         { scenes { id } }
-    }`;
+    }`
     return gqlClient(localStash, query, { stash_id: sceneId })
-        .then(data => data.findScenes.scenes);
+        .then(data => data.findScenes.scenes)
 }
 function queryLocalMultiple(sceneIDs) {
     sceneIDs.forEach(async (id) => {
-        const localScenes = await queryLocal(id);
-        if (localScenes.length == 0) return;
-        await mongoApiDelete(id);
-        const scene = document.querySelector(`[data-stash-id="${id}"]`);
-        scene.remove()
-    });
+        const localScenes = await queryLocal(id)
+        if (localScenes.length == 0) return
+        await mongoApiDelete(id)
+        document.querySelector(`[data-stash-id="${id}"]`).remove()
+    })
 }
 async function testApis() {
-    const mongoOK = await fetch(`${mongoApi.host}/test?auth=${mongoApi.apikey}`)
-        .then(response => response.ok)
-        .catch(error => false);
-    const stashOK = await fetch(`${stashDB.host}?query=query Me { me { id } }`, { headers: { ApiKey: stashDB.apikey } })
-        .then(response => response.ok)
-        .catch(error => false);
-    const localStashOK = await fetch(`${localStash.host}?query=query Version { version { version } }`, { headers: { ApiKey: localStash.apikey } })
-        .then(response => response.ok)
-        .catch(error => false);
-    const placeholder = document.getElementById("placeholder");
+    const fetchTest = (url) => fetch(url).then(response => response.ok).catch(error => false)
+    const mongoOK = await fetchTest(`${mongoApi.host}/test?auth=${mongoApi.apikey}`)
+    const stashOK = await fetchTest(`${stashDB.host}?query=query Me { me { id } }`, { headers: { ApiKey: stashDB.apikey } })
+    const localStashOK = await fetchTest(`${localStash.host}?query=query Version { version { version } }`, { headers: { ApiKey: localStash.apikey } })
+    const placeholder = document.getElementById("placeholder")
     function addWarning(name, status) {
-        const warning = document.createElement("p");
-        warning.textContent = `${name}: ${status ? "OK" : "Error"}`;
-        placeholder.appendChild(warning);
+        const warning = document.createElement("p")
+        warning.textContent = `${name}: ${status ? "OK" : "Error"}`
+        placeholder.appendChild(warning)
     }
     if (mongoOK && stashOK && localStashOK) {
-        placeholder.remove();
-        fetchWishlist();
+        placeholder.remove()
+        fetchWishlist()
     } else {
-        addWarning("StashDB", stashOK);
-        addWarning("Local Stash", localStashOK);
-        addWarning("Mongo API", mongoOK);
+        addWarning("StashDB", stashOK)
+        addWarning("Local Stash", localStashOK)
+        addWarning("Mongo API", mongoOK)
     }
 }
-testApis();
+testApis()
