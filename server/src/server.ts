@@ -104,6 +104,20 @@ export const init = async function () {
       auth: false,
     },
   });
+  // js assets
+  server.route({
+    method: "GET",
+    path: "/assets/{filename*}",
+    handler: {
+      directory: {
+        path: "assets",
+        index: false
+      },
+    },
+    options: {
+      auth: false,
+    },
+  });
   // /user/create
   server.route({
     method: "GET",
