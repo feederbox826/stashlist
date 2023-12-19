@@ -50,7 +50,7 @@ export const init = async function () {
     method: "GET",
     path: "/",
     handler: (req, h) => {
-      return h.redirect("/wishlist/");
+      return h.redirect("wishlist/");
     },
     options: {
       auth: false,
@@ -74,7 +74,7 @@ export const init = async function () {
     method: "GET",
     path: "/wishlist",
     handler: (req, h) => {
-      return h.redirect("/wishlist/");
+      return h.redirect("wishlist/");
     },
     options: {
       auth: false,
@@ -98,7 +98,7 @@ export const init = async function () {
     method: "GET",
     path: "/setup",
     handler: (req, h) => {
-      return h.redirect("/setup/");
+      return h.redirect("setup/");
     },
     options: {
       auth: false,

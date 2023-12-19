@@ -23,7 +23,7 @@ export function postAddBulkHandler(req: Request, h: ResponseToolkit) {
   const listtype: listTypeEnum = listTypeEnum[payload.type];
   // run
   list.addToListBulk(userid, stashids, listtype);
-  return `added ${stashids.length} items to ${payload.type} list`;
+  return { message: `added ${stashids.length} items to ${payload.type} list` };
 }
 export const postAddBulkValidate = {
   payload: Joi.object({
@@ -41,6 +41,10 @@ export function postAddHandler(req: Request, h: ResponseToolkit) {
     return h.response("Missing ApiKey header").code(401);
   const userid = Number.parseInt(req.auth.credentials.userid as string);
   const stashid = req.query.stashid;
+  if (req.params.type === "remove") {
+    list.removeFromList(userid, stashid);
+    return { message: `removed ${stashid} from all lists` };
+  }
   const listtype: listTypeEnum = listTypeEnum[req.params.type as string];
   list.addToList({ userid, stashid, listtype });
   return `added ${stashid} to ${req.params.type} list`;
@@ -51,7 +55,7 @@ export const postAddValidate = {
   }),
   params: Joi.object({
     type: Joi.string()
-      .valid(...listTypeKeyArr)
+      .valid(...listTypeKeyArr, "remove")
       .required(),
   }),
 };
@@ -64,7 +68,7 @@ export async function postFindBulkHandler(req: Request, h: ResponseToolkit) {
   const stashids: string[] = payload.stashids;
   const result = await list.findItems(userid, stashids);
   // filter object
-  if (!result) return h.response("No items found").code(404);
+  if (!result) return h.response({ error: "No items found" }).code(404);
   return result;
 }
 export const postFindBulkValidate = {
@@ -81,7 +85,7 @@ export async function getFindHandler(req: Request, h: ResponseToolkit) {
   const userid = Number.parseInt(req.auth.credentials.userid as string);
   const stashid = req.params.id;
   const listType = await list.findItem(userid, stashid);
-  if (!listType) return h.response("No item found").code(404);
+  if (!listType) return h.response({ error: "No item found" }).code(404);
   const typeString = listTypeEnum[listType as listTypeKeys];
   return typeString;
 }

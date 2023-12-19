@@ -47,6 +47,13 @@ export const addToList = async ({
     ON CONFLICT (userid, stashid) DO UPDATE SET listtype = ${listtype}`;
 };
 
+// remove from list
+export const removeFromList = async (userid: number, stashid: stashid) => {
+  await sql`DELETE FROM lists WHERE userid = ${String(
+    userid,
+  )} AND stashid = ${stashid}`;
+};
+
 // add to list (bulk)
 export const addToListBulk = async (
   userid: number,
