@@ -3,9 +3,9 @@ const stashDB = {
     apikey: localStorage.getItem("stashdb_apikey"),
     host: localStorage.getItem("stashdb_host")
 }
-const mongoApi = {
-    apikey: localStorage.getItem("mongo_apikey"),
-    host: localStorage.getItem("mongo_host")
+const stashlist_server = {
+    apikey: localStorage.getItem("stashlist_host"),
+    host: localStorage.getItem("stashlist_apikey")
 }
 const jackettUrl = localStorage.getItem("jackett_host")
 const localStash = {
