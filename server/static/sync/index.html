@@ -8,6 +8,11 @@
       border-color: #ddd;
       font-size: 1em;
     }
+    input[type="button"] {
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 20px;
+    }
     .hero {
       display: flex;
       flex-direction: column;
@@ -15,35 +20,14 @@
   </style>
 </head>
 <body>
-  <pre id="config" class="hero" style="width: 50vw;">
-    <input type="button" value="Sync local stash history" onclick="sync()">
-  </pre>
+  <div class="hero">
+    <input id="sync-button" type="button" value="Sync local stash history" onclick="sync()">
+    <pre>
+      <code id="output"></code>
+    </pre>
+  </div>
   <script src="../assets/apis.js"></script>
+  <script src="./sync.js"></script>
   <script>
-    const stashdb_host = localStorage.getItem("stashdb_host")
-    const stashlist_server = {
-        apikey: localStorage.getItem("stashlist_apikey"),
-        host: localStorage.getItem("stashlist_host")
-    }
-    const localStash = {
-        apikey: localStorage.getItem("localstash_apikey"),
-        host: localStorage.getItem("localstash_host")
-    }
-    async function sync() {
-        const query = `
-            query FindScenes($endpoint: String!) {
-            findScenes( scene_filter: {
-                stash_id_endpoint: { endpoint: $endpoint modifier: NOT_NULL }
-            } filter: { per_page: -1 }
-            ) { scenes { stash_ids { stash_id }
-        }}}`
-        const variables = { endpoint: stashdb_host };
-        const idlist = await gqlClient(localStash, query, variables)
-            .then(data => data.findScenes.scenes)
-            .then(scenes => scenes.map(scene => scene.stash_ids[0].stash_id))
-        // sync to stashlist
-        const saniList = [...new Set(idlist)]
-        await stashlist.addbulk(saniList, "history")
-    }
   </script>
 </body></html>
