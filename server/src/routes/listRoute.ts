@@ -67,8 +67,6 @@ export async function postFindBulkHandler(req: Request, h: ResponseToolkit) {
   const payload = req.payload as { stashids: string[] };
   const stashids: string[] = payload.stashids;
   const result = await list.findItems(userid, stashids);
-  // filter object
-  if (!result) return h.response("No items found").code(404);
   return result;
 }
 export const postFindBulkValidate = {
@@ -85,7 +83,7 @@ export async function getFindHandler(req: Request, h: ResponseToolkit) {
   const userid = Number.parseInt(req.auth.credentials.userid as string);
   const stashid = req.params.id;
   const listType = await list.findItem(userid, stashid);
-  if (!listType) return h.response("No item found").code(404);
+  if (!listType) return h.response({ type: undefined }).code(404);
   const typeString = listTypeEnum[listType as listTypeKeys];
   return { type: typeString };
 }

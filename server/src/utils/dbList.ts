@@ -92,17 +92,14 @@ export const findItems = async (
     await sql`SELECT stashid, listtype FROM lists WHERE userid = ${String(
       userid,
     )} AND stashid in ${sql(stashids)}`;
-  if (dbResult.length === 0) {
-    return false;
-  }
   const results = {
     wish: [],
     ignore: [],
     history: [],
   };
-  for (const item of dbResult) {
+  dbResult.forEach((item) => {
     const typeString = listTypeEnum[item.listtype];
     results[typeString].push(item.stashid);
-  }
+  });
   return results;
 };
