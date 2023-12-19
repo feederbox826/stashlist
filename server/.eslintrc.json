@@ -1,0 +1,17 @@
+{
+  "env": {
+    "commonjs": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "parserOptions": {
+    "ecmaVersion": 13
+  },
+  "ignorePatterns": ["src/static/**/*"],
+  "rules": {
+    "quotes": [2, "double"],
+    "no-console": "warn",
+    "semi": ["warn", "always"]
+  }
+}

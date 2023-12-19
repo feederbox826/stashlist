@@ -1,16 +1,30 @@
 {
-	"name": "mongo-api",
+	"name": "stashlist-server",
 	"version": "1.0.0",
-	"main": "server.js",
+	"main": "src/index.ts",
 	"dependencies": {
-		"@fastify/cors": "^8.4.2",
-		"@fastify/mongodb": "^8.0.0",
-		"@fastify/static": "^6.12.0",
+		"@hapi/boom": "^10.0.1",
+		"@hapi/hapi": "^21.3.2",
+		"@hapi/inert": "^7.1.0",
+		"@hapi/vision": "^7.0.3",
 		"dotenv": "^16.3.1",
-		"fastify": "^4.25.1"
+		"hapi-swagger": "^17.2.0",
+		"joi": "^17.11.0",
+		"postgres": "^3.4.3",
+		"uuid": "^9.0.1"
 	},
 	"scripts": {
-		"start": "node server.js"
+		"start": "ts-node src/index.ts",
+		"tsc": "tsc",
+		"dev": "nodemon",
+		"lint": "eslint src",
+		"lint:fix": "eslint src --fix",
+		"prettify": "prettier --write \"src/**/*.ts\""
 	},
-	"private": true
+	"private": true,
+	"devDependencies": {
+		"@types/node": "^20.10.5",
+		"@types/uuid": "^9.0.7",
+		"@typescript-eslint/eslint-plugin": "^6.15.0"
+	}
 }
