@@ -33,7 +33,7 @@
     <input type="button" id="save" value="Save" onclick="save_localstorage()">
   </pre>
   <script>
-    const valueArr = ["mongo_host", "mongo_apikey", "stashdb_host", "stashdb_apikey", "jackett_host", "localstash_host", "localstash_apikey"]
+    const valueArr = ["stashlist_host", "stashlist_apikey", "stashdb_host", "stashdb_apikey", "jackett_host", "localstash_host", "localstash_apikey"]
     const load_input = (name) => document.getElementById(name).value = localStorage.getItem(name);
     const save_input = (name) => localStorage.setItem(name, document.getElementById(name).value);
     const save_localstorage = () => {

@@ -59,59 +59,12 @@ export const init = async function () {
   // wishlist
   server.route({
     method: "GET",
-    path: "/wishlist/{filename*}",
+    path: "/{filename*}",
     handler: {
       directory: {
-        path: "wishlist",
+        path: ".",
         index: ["index.html"],
-      },
-    },
-    options: {
-      auth: false,
-    },
-  });
-  server.route({
-    method: "GET",
-    path: "/wishlist",
-    handler: (req, h) => {
-      return h.redirect("wishlist/");
-    },
-    options: {
-      auth: false,
-    },
-  });
-  // setup
-  server.route({
-    method: "GET",
-    path: "/setup/{filename*}",
-    handler: {
-      directory: {
-        path: "setup",
-        index: ["index.html"],
-      },
-    },
-    options: {
-      auth: false,
-    },
-  });
-  server.route({
-    method: "GET",
-    path: "/setup",
-    handler: (req, h) => {
-      return h.redirect("setup/");
-    },
-    options: {
-      auth: false,
-    },
-  });
-  // js assets
-  server.route({
-    method: "GET",
-    path: "/assets/{filename*}",
-    handler: {
-      directory: {
-        path: "assets",
-        index: false
+        redirectToSlash: true,
       },
     },
     options: {

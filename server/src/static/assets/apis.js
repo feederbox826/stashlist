@@ -18,11 +18,12 @@ const stashlistClient = (method = "GET", path, overrides) => {
       headers: { "ApiKey": stashlist_server.apikey, "Content-Type": "application/json" },
       ...overrides
     })
-    .then(response => response.json())
-    .then(data => data)
 }
 
 const stashlist = {
+    addbulk: (ids, list) => stashlistClient("POST", `/list/add/bulk`, {
+        body: JSON.stringify({ stashids: ids, type: list })
+    }),
     modify: (id, list) => stashlistClient("POST", `/list/add/${list}`, {
         params: { stashid: id }
     }),

@@ -69,7 +69,7 @@ export const addToListBulk = async (
   await sql`INSERT INTO stashids ${sql(stashIdArray)} ON CONFLICT DO NOTHING`;
   await sql`INSERT INTO lists ${sql(
     addArray,
-  )} ON CONFLICT (userid, stashid) DO UPDATE SET listtype = ${listtype}`;
+  )} ON CONFLICT (userid, stashid) DO UPDATE SET listtype = EXCLUDED.listtype`;
 };
 
 // find item
