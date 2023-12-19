@@ -7,8 +7,8 @@ export async function createHandler(req: Request, h: ResponseToolkit) {
   const registerToken = req.query.token;
   if (
     !registerToken ||
-    (process.env.registration != "OPEN" &&
-      registerToken != process.env.registration)
+    (process.env.REGISTRATION != "OPEN" &&
+      registerToken != process.env.REGISTRATION)
   ) {
     return h.response({ error: "Registration not open" }).code(401);
   }
