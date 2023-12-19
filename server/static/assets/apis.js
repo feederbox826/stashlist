@@ -1,7 +1,6 @@
 function gqlClient(instance, query, variables) {
     const options = {
         method: "GET",
-        cache: "force-cache",
         headers: { "ApiKey": instance.apikey },
     }
     const params = new URLSearchParams({ query: query.replace(/\++/, "+"), variables: JSON.stringify(variables) })
@@ -14,7 +13,6 @@ const stashlistClient = (method = "GET", path, overrides) => {
     const params = new URLSearchParams(overrides?.params ?? {})
     return fetch(`${stashlist_server.host}${path}?${params}`, {
       method,
-      cache: "force-cache",
       headers: { "ApiKey": stashlist_server.apikey, "Content-Type": "application/json" },
       ...overrides
     })
