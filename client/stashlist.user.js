@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.0.0
+// @version      2.0.1
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      http://localhost:9999
@@ -10,11 +10,11 @@
 // @author       feederbox826
 // @updateURL    https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
 // @downloadURL  https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
-// @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/src/static/assets/apis.js
+// @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
 // ==/UserScript==
 "use strict";
 
-const mongoApi = {
+const stashlist_server = {
   apikey: "xxxx",
   host: "",
 };
