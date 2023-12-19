@@ -1,13 +1,16 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      1.0.0
+// @version      2.0.0
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      http://localhost:9999
 // @grant        GM_addStyle
 // @run-at       document-idle
 // @author       feederbox826
+// @updateURL    https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
+// @downloadURL  https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
+// @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/src/static/assets/apis.js
 // ==/UserScript==
 "use strict";
 
@@ -17,7 +20,7 @@ const mongoApi = {
 };
 const localStash = {
   apikey: "",
-  host: "localhost:9999",
+  host: "http://localhost:9999",
 };
 
 GM_addStyle(`
@@ -31,11 +34,14 @@ GM_addStyle(`
 .stashlist.ignore {
   border-color: red;
 }
-.stashlist.ignore img {
+.stashlist.ignore, .stashlist.history img {
   opacity: 0.25;
 }
-.stashlist.wishlist {
+.stashlist.wish {
   border-color: yellow;
+}
+.stashlist.history {
+  border-color: plum;
 }
 .stashlist-buttonct {
   margin-left: 10px;
@@ -95,20 +101,6 @@ function wfke(selector, callback) {
   setTimeout(wfke, 100, selector, callback);
 }
 
-function mongoApiRaw(method, sceneID, path, type, override) {
-  const typeQuery = type ? `&type=${type}` : "";
-  const idQuery = sceneID ? `&id=${sceneID}` : "";
-  const url = `${mongoApi.host}${path}?auth=${mongoApi.apikey}${idQuery}${typeQuery}`;
-  const options = override ?? { method };
-  return window.fetch(url, options);
-}
-
-function mongoApiManipulate(sceneID, action) {
-  const method = action === "delete" ? "DELETE" : "POST";
-  const type = action === "delete" ? "" : action;
-  return mongoApiRaw(method, sceneID, "", type);
-}
-
 function queryLocal(sceneId) {
   const query = `query find($stash_id: String!) {
   findScenes(scene_filter: {
@@ -117,32 +109,8 @@ function queryLocal(sceneId) {
   }})
   { scenes { id } }}`;
   const variables = { stash_id: sceneId };
-  const headers = {
-    "Content-Type": "application/json",
-    ApiKey: localStash.apikey,
-  };
-  const options = {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ query, variables }),
-  };
-  return window
-    .fetch(`${localStash.host}/graphql`, options)
-    .then((response) => response.json())
-    .then((data) => data.data.findScenes.scenes);
-}
-const queryApiSingle = async (sceneId) =>
-  mongoApiRaw("GET", sceneId, "").then((response) => response.json());
-
-function queryApiBulk(sceneIds) {
-  const options = {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ids: sceneIds }),
-  };
-  return mongoApiRaw(null, null, "/multi", null, options).then((response) =>
-    response.json(),
-  );
+  return gqlClient(localStash, query, variables)
+    .then(data => data.findScenes.scenes);
 }
 
 function applyBulkMark(sceneIDs, type) {
@@ -155,7 +123,7 @@ function applyBulkMark(sceneIDs, type) {
 }
 
 function queryLocalScenes(sceneIDs) {
-  const otherClasses = ["ignore", "wishlist"];
+  const otherClasses = ["ignore", "wish", "history"];
   sceneIDs.forEach(async (id) => {
     const localScenes = await queryLocal(id);
     if (localScenes.length == 0) return;
@@ -163,7 +131,8 @@ function queryLocalScenes(sceneIDs) {
     addMatch(scene, localScenes[0].id);
     scene.classList.add("match");
     if (otherClasses.some((elem) => scene.classList.contains(elem))) {
-      await mongoApiManipulate(id, "delete");
+      await stashlist.modify(id, "history");
+      console.log("removing classes")
       scene.classList.remove(otherClasses);
     }
   });
@@ -199,9 +168,10 @@ function markScenes() {
   });
   // query API for results
   if (stashids.length === 0) return;
-  queryApiBulk(stashids).then((results) => {
+  stashlist.findBulk(stashids).then((results) => {
     applyBulkMark(results.ignore, "ignore");
-    applyBulkMark(results.wishlist, "wishlist");
+    applyBulkMark(results.wish, "wish");
+    applyBulkMark(results.history, "history")
   });
   // query individual scenes
   queryLocalScenes(stashids);
@@ -243,7 +213,7 @@ const handleClick = async (e, type) => {
   e.stopImmediatePropagation();
   const card = e.target.closest("[data-stash-id]");
   const stashid = card.getAttribute("data-stash-id");
-  await mongoApiManipulate(stashid, type);
+  await stashlist.modify(stashid, type);
   card.classList.add(type);
   addRemoveButton(card);
   return card;
@@ -254,13 +224,13 @@ function addIgnore(scene) {
   addButton(scene, "ignore", "🚫", ignoreID);
 }
 function addWishlist(scene) {
-  const wishlistID = (e) => handleClick(e, "wishlist");
-  addButton(scene, "wishlist", "🌟", wishlistID);
+  const wishlistID = (e) => handleClick(e, "wish");
+  addButton(scene, "wish", "🌟", wishlistID);
 }
 function addRemoveButton(scene) {
   const removeID = (e) =>
-    handleClick(e, "delete").then((card) => {
-      card.classList.remove("ignore", "wishlist");
+    handleClick(e, "remove").then((card) => {
+      card.classList.remove("ignore", "wish", "history");
       removeDefaultButtons(card);
       addWishlist(card);
       addIgnore(card);
