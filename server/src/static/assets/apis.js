@@ -11,7 +11,7 @@ function gqlClient(instance, query, variables) {
 }
 
 const stashlistClient = (method = "GET", path, overrides) => {
-    const params = new URLSearchParams(overrides.params || {})
+    const params = new URLSearchParams(overrides?.params ?? {})
     return fetch(`${stashlist_server.host}${path}?${params}`, {
       method,
       cache: "force-cache",

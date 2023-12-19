@@ -4,8 +4,8 @@ const stashDB = {
     host: localStorage.getItem("stashdb_host")
 }
 const stashlist_server = {
-    apikey: localStorage.getItem("stashlist_host"),
-    host: localStorage.getItem("stashlist_apikey")
+    apikey: localStorage.getItem("stashlist_apikey"),
+    host: localStorage.getItem("stashlist_host")
 }
 const jackettUrl = localStorage.getItem("jackett_host")
 const localStash = {
@@ -30,7 +30,16 @@ const handleDelete = async (e) => {
     const card = e.target.closest("[data-stash-id]")
     const stashid = card.getAttribute("data-stash-id")
     if (confirm("Confirm delete?") == false) return
-    await mongoApiDelete(stashid)
+    await stashlist.modify(stashid, "delete")
+    card.remove()
+}
+const handleHistory = async (e) => {
+    e.preventDefault()
+    e.stopImmediatePropagation()
+    const card = e.target.closest("[data-stash-id]")
+    const stashid = card.getAttribute("data-stash-id")
+    if (confirm("Confirm add to History?") == false) return
+    await stashlist.modify(stashid, "history")
     card.remove()
 }
 function createDiv(item) {
@@ -58,6 +67,8 @@ function createDiv(item) {
     clone.querySelector(".jackett-search").href = `${jackettUrl}#search=${searchQuery.replace(" ", "+")}`
     clone.querySelector(".stashlist-btn-remove")
         .addEventListener("click", handleDelete)
+    clone.querySelector(".stashlist-btn-history")
+        .addEventListener("click", handleHistory)
     clone.querySelector(".stashlist-btn-copy")
         .addEventListener("click", () => navigator.clipboard.writeText(searchQuery))
     clone.querySelector(".stashlist-btn-hide")
@@ -66,7 +77,7 @@ function createDiv(item) {
         .appendChild(clone)
 }
 const fetchWishlist = () =>
-    getWishList().then(data => {
+    stashlist.getlist("wish").then(data => {
         data.forEach(item => fetchStashDB(item)
             .then(dbItem => createDiv(dbItem)))
         queryLocalMultiple(data)
@@ -86,13 +97,13 @@ function queryLocalMultiple(sceneIDs) {
     sceneIDs.forEach(async (id) => {
         const localScenes = await queryLocal(id)
         if (localScenes.length == 0) return
-        await mongoApiDelete(id)
+        await stashlist.modify(id, "history")
         document.querySelector(`[data-stash-id="${id}"]`).remove()
     })
 }
 async function testApis() {
     const fetchTest = (url, headers) => fetch(url, { headers }).then(response => response.ok).catch(error => false)
-    const mongoOK = await fetchTest(`${mongoApi.host}/test?auth=${mongoApi.apikey}`)
+    const stashlistOK = await fetchTest(`${stashlist_server.host}/user/test`, { ApiKey: stashlist_server.apikey })
     const stashOK = await fetchTest(`${stashDB.host}?query=query Me { me { id } }`, { ApiKey: stashDB.apikey })
     const localStashOK = await fetchTest(`${localStash.host}?query=query Version { version { version } }`, { ApiKey: localStash.apikey })
     const placeholder = document.getElementById("placeholder")
@@ -101,13 +112,13 @@ async function testApis() {
         warning.textContent = `${name}: ${status ? "OK" : "Error"}`
         placeholder.appendChild(warning)
     }
-    if (mongoOK && stashOK && localStashOK) {
+    if (stashlistOK && stashOK && localStashOK) {
         placeholder.remove()
         fetchWishlist()
     } else {
         addWarning("StashDB", stashOK)
         addWarning("Local Stash", localStashOK)
-        addWarning("Mongo API", mongoOK)
+        addWarning("stashlist", stashlistOK)
     }
 }
 testApis()
