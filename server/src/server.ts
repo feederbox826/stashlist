@@ -28,7 +28,7 @@ export const init = async function () {
         headers: ["Content-Type", "ApiKey"],
       },
       files: {
-        relativeTo: join(__dirname, "static"),
+        relativeTo: "./static",
       },
     },
   });
