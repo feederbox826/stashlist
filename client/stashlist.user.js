@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.0.1
+// @version      2.0.2
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      http://localhost:9999
@@ -133,7 +133,7 @@ function queryLocalScenes(sceneIDs) {
     if (otherClasses.some((elem) => scene.classList.contains(elem))) {
       await stashlist.modify(id, "history");
       console.log("removing classes")
-      scene.classList.remove(otherClasses);
+      scene.classList.remove(...otherClasses);
     }
   });
 }
