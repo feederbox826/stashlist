@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.0.2
+// @version      2.0.3
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      http://localhost:9999
 // @grant        GM_addStyle
+// @grant        GM_getValue
+// @grant        GM_setValue
 // @run-at       document-idle
 // @author       feederbox826
 // @updateURL    https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
@@ -14,14 +16,15 @@
 // ==/UserScript==
 "use strict";
 
-const stashlist_server = {
+const stashlist_server = GM_getValue("stashlist_server", {
   apikey: "xxxx",
   host: "",
-};
-const localStash = {
+});
+const localStash = GM_getValue("localStash", {
   apikey: "",
   host: "http://localhost:9999",
-};
+});
+GM_setValue("example_key", { apikey: "xxxx", host: "" });
 
 GM_addStyle(`
 .stashlist {
@@ -165,6 +168,7 @@ function markScenes() {
     // add default buttons
     addIgnore(scene);
     addWishlist(scene);
+    addHistoryButton(scene);
   });
   // query API for results
   if (stashids.length === 0) return;
@@ -234,9 +238,16 @@ function addRemoveButton(scene) {
       removeDefaultButtons(card);
       addWishlist(card);
       addIgnore(card);
+      addHistoryButton(card);
     });
   removeDefaultButtons(scene);
   addButton(scene, "remove", "🗑️", removeID);
+  addHistoryButton(scene);
+}
+function addHistoryButton(scene) {
+  if (scene.classList.contains("history")) return;
+  const historyID = (e) => handleClick(e, "history");
+  addButton(scene, "history", "📜", historyID);
 }
 function removeDefaultButtons(scene) {
   const buttonContainer = scene.querySelector(".stashlist-btnct");
