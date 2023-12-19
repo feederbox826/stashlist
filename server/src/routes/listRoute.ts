@@ -47,7 +47,7 @@ export function postAddHandler(req: Request, h: ResponseToolkit) {
   }
   const listtype: listTypeEnum = listTypeEnum[req.params.type as string];
   list.addToList({ userid, stashid, listtype });
-  return `added ${stashid} to ${req.params.type} list`;
+  return { message: `added ${stashid} to ${req.params.type} list` };
 }
 export const postAddValidate = {
   query: Joi.object({
@@ -68,7 +68,7 @@ export async function postFindBulkHandler(req: Request, h: ResponseToolkit) {
   const stashids: string[] = payload.stashids;
   const result = await list.findItems(userid, stashids);
   // filter object
-  if (!result) return h.response({ error: "No items found" }).code(404);
+  if (!result) return h.response("No items found").code(404);
   return result;
 }
 export const postFindBulkValidate = {
@@ -85,9 +85,9 @@ export async function getFindHandler(req: Request, h: ResponseToolkit) {
   const userid = Number.parseInt(req.auth.credentials.userid as string);
   const stashid = req.params.id;
   const listType = await list.findItem(userid, stashid);
-  if (!listType) return h.response({ error: "No item found" }).code(404);
+  if (!listType) return h.response("No item found").code(404);
   const typeString = listTypeEnum[listType as listTypeKeys];
-  return typeString;
+  return { type: typeString };
 }
 export const getFindValidate = {
   params: Joi.object({
