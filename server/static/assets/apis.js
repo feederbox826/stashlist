@@ -1,25 +1,25 @@
 function gqlClient(instance, query, variables) {
     const options = {
-        method: "GET",
-        headers: { "ApiKey": instance.apikey },
-    }
-    const params = new URLSearchParams({ query: query.replace(/\++/, "+"), variables: JSON.stringify(variables) })
-    return fetch(`${instance.host}?${params}`, options)
+        method: "POST",
+        headers: { "ApiKey": instance.apikey, "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables })
+    };
+    return fetch(`${instance.host}`, options)
         .then(response => response.json())
-        .then(data => data.data)
+        .then(data => data.data);
 }
 
 const stashlistClient = (method = "GET", path, overrides) => {
-    const params = new URLSearchParams(overrides?.params ?? {})
+    const params = new URLSearchParams(overrides?.params ?? {});
     return fetch(`${stashlist_server.host}${path}?${params}`, {
       method,
       headers: { "ApiKey": stashlist_server.apikey, "Content-Type": "application/json" },
       ...overrides
-    })
-}
+    });
+};
 
 const stashlist = {
-    addbulk: (ids, list) => stashlistClient("POST", `/list/add/bulk`, {
+    addbulk: (ids, list) => stashlistClient("POST", "/list/add/bulk", {
         body: JSON.stringify({ stashids: ids, type: list })
     }),
     modify: (id, list) => stashlistClient("POST", `/list/add/${list}`, {
@@ -33,4 +33,4 @@ const stashlist = {
       .then(res => res.json()),
     getlist: (list) => stashlistClient("GET", `/list/${list}`)
       .then(res => res.json()),
-}
+};
