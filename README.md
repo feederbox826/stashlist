@@ -1,3 +1,14 @@
-Server and Client for stashlist
+# stashlist
+Flag scenes in StashBox (StashDB.org) as
+- wishlist
+- ignore
+- history
+- matches (available in local stashapp instance)
 
-Flags scenes in stashbox as ignore or wishlist and show matches from stashdb instance if available
+## components
+- server/
+  - run the stashlist server
+- clients
+  - userscript for stashdb
+- plugin
+  - plugin for automatic history sync

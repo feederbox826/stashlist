@@ -1,0 +1,22 @@
+name: stashlist-sync
+description: Sync stashIDs to stashlist history
+version: 0.1
+url: https://github.com/feederbox826/stashlist
+exec:
+  - python
+  - "{pluginDir}/stashlist-sync.py"
+interface: raw
+hooks:
+  - name: Add Scene to stashlist
+    description: Add new stashIDs to stashlist history
+    triggeredBy:
+      - Scene.Update.Post
+tasks:
+  - name: Sync
+    description: Sync all stashIDs to stashlist history
+    defaultArgs:
+      mode: syncall
+settings:
+  stashlist_apikey:
+    displayName: stashlist ApiKey
+    type: string
