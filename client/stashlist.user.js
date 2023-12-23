@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.0.3
+// @version      2.0.4
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      http://localhost:9999
@@ -37,7 +37,7 @@ GM_addStyle(`
 .stashlist.ignore {
   border-color: red;
 }
-.stashlist.ignore, .stashlist.history img {
+.stashlist.ignore img, .stashlist.history img {
   opacity: 0.25;
 }
 .stashlist.wish {
@@ -102,18 +102,6 @@ function wfke(selector, callback) {
   let el = document.querySelector(selector);
   if (el) return callback();
   setTimeout(wfke, 100, selector, callback);
-}
-
-function queryLocal(sceneId) {
-  const query = `query find($stash_id: String!) {
-  findScenes(scene_filter: {
-    stash_id: {
-    value: $stash_id modifier: EQUALS
-  }})
-  { scenes { id } }}`;
-  const variables = { stash_id: sceneId };
-  return gqlClient(localStash, query, variables)
-    .then(data => data.findScenes.scenes);
 }
 
 function applyBulkMark(sceneIDs, type) {
