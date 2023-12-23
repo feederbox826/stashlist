@@ -34,3 +34,15 @@ const stashlist = {
     getlist: (list) => stashlistClient("GET", `/list/${list}`)
       .then(res => res.json()),
 };
+
+function queryLocal(sceneId) {
+  const query = `query find($stash_id: String!) {
+  findScenes(scene_filter: {
+    stash_id: {
+    value: $stash_id modifier: EQUALS
+  }})
+  { scenes { id } }}`;
+  const variables = { stash_id: sceneId };
+  return gqlClient(localStash, query, variables)
+    .then(data => data.findScenes.scenes);
+}
