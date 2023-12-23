@@ -1,11 +1,11 @@
 // types
 import { listTypeEnum, listTypeKeys, listTypeKeyArr } from "../types/listType";
-import { Request, ResponseToolkit } from "@hapi/hapi";
+import { Request, ResponseToolkit, ServerRoute } from "@hapi/hapi";
 import Joi from "joi";
 import * as list from "../utils/dbList";
 
 // /all - get all lists
-export function getAllHandler(req: Request, h: ResponseToolkit) {
+function getAllHandler(req: Request, h: ResponseToolkit) {
   if (!req.auth.credentials.userid)
     return h.response("Missing ApiKey header").code(401);
   const userid = Number.parseInt(req.auth.credentials.userid as string);
@@ -13,7 +13,7 @@ export function getAllHandler(req: Request, h: ResponseToolkit) {
   return lists;
 }
 // /add/bulk - add to list (bulk)
-export function postAddBulkHandler(req: Request, h: ResponseToolkit) {
+function postAddBulkHandler(req: Request, h: ResponseToolkit) {
   // preparse
   if (!req.auth.credentials.userid)
     return h.response("Missing ApiKey header").code(401);
@@ -25,7 +25,7 @@ export function postAddBulkHandler(req: Request, h: ResponseToolkit) {
   list.addToListBulk(userid, stashids, listtype);
   return { message: `added ${stashids.length} items to ${payload.type} list` };
 }
-export const postAddBulkValidate = {
+const postAddBulkValidate = {
   payload: Joi.object({
     stashids: Joi.array()
       .items(Joi.string().guid({ version: "uuidv4" }).required())
@@ -36,7 +36,7 @@ export const postAddBulkValidate = {
   }),
 };
 // /add/:type - add to list
-export function postAddHandler(req: Request, h: ResponseToolkit) {
+function postAddHandler(req: Request, h: ResponseToolkit) {
   if (!req.auth.credentials.userid)
     return h.response("Missing ApiKey header").code(401);
   const userid = Number.parseInt(req.auth.credentials.userid as string);
@@ -49,7 +49,7 @@ export function postAddHandler(req: Request, h: ResponseToolkit) {
   list.addToList({ userid, stashid, listtype });
   return { message: `added ${stashid} to ${req.params.type} list` };
 }
-export const postAddValidate = {
+const postAddValidate = {
   query: Joi.object({
     stashid: Joi.string().guid({ version: "uuidv4" }).required(),
   }),
@@ -60,7 +60,7 @@ export const postAddValidate = {
   }),
 };
 // /find/bulk - find items from body
-export async function postFindBulkHandler(req: Request, h: ResponseToolkit) {
+async function postFindBulkHandler(req: Request, h: ResponseToolkit) {
   if (!req.auth.credentials.userid)
     return h.response("Missing ApiKey header").code(401);
   const userid = Number.parseInt(req.auth.credentials.userid as string);
@@ -69,7 +69,7 @@ export async function postFindBulkHandler(req: Request, h: ResponseToolkit) {
   const result = await list.findItems(userid, stashids);
   return result;
 }
-export const postFindBulkValidate = {
+const postFindBulkValidate = {
   payload: Joi.object({
     stashids: Joi.array()
       .items(Joi.string().guid({ version: "uuidv4" }).required())
@@ -77,7 +77,7 @@ export const postFindBulkValidate = {
   }),
 };
 // /find - find item
-export async function getFindHandler(req: Request, h: ResponseToolkit) {
+async function getFindHandler(req: Request, h: ResponseToolkit) {
   if (!req.auth.credentials.userid)
     return h.response("Missing ApiKey header").code(401);
   const userid = Number.parseInt(req.auth.credentials.userid as string);
@@ -87,13 +87,13 @@ export async function getFindHandler(req: Request, h: ResponseToolkit) {
   const typeString = listTypeEnum[listType as listTypeKeys];
   return { type: typeString };
 }
-export const getFindValidate = {
+const getFindValidate = {
   params: Joi.object({
     id: Joi.string().guid({ version: "uuidv4" }).required(),
   }),
 };
 // /:listtype - get list of type
-export async function getListHandler(req: Request, h: ResponseToolkit) {
+async function getListHandler(req: Request, h: ResponseToolkit) {
   if (!req.auth.credentials.userid)
     return h.response("Missing ApiKey header").code(401);
   const userid = Number.parseInt(req.auth.credentials.userid as string);
@@ -101,10 +101,77 @@ export async function getListHandler(req: Request, h: ResponseToolkit) {
   const result = await list.getList(userid, listtype);
   return result;
 }
-export const getListValidate = {
+const getListValidate = {
   params: Joi.object({
     type: Joi.string()
       .valid(...listTypeKeyArr)
       .required(),
   }),
 };
+
+export const listRoutes: ServerRoute[] = [{
+  method: "GET",
+  path: "/api/list/all",
+  handler: getAllHandler,
+  options: {
+    auth: {
+      mode: "required",
+    },
+    tags: ["api"],
+  },
+}, {
+  method: "POST",
+  path: "/api/list/add/bulk",
+  handler: postAddBulkHandler,
+  options: {
+    auth: {
+      mode: "required",
+    },
+    validate: postAddBulkValidate,
+    tags: ["api"],
+  },
+}, {
+  method: "POST",
+  path: "/api/list/add/{type}",
+  handler: postAddHandler,
+  options: {
+    auth: {
+      mode: "required",
+    },
+    validate: postAddValidate,
+    tags: ["api"],
+  },
+}, {
+  method: "POST",
+  path: "/api/list/find/bulk",
+  handler: postFindBulkHandler,
+  options: {
+    auth: {
+      mode: "required",
+    },
+    validate: postFindBulkValidate,
+    tags: ["api"],
+  },
+}, {
+  method: "GET",
+  path: "/api/list/find/{id}",
+  handler: getFindHandler,
+  options: {
+    auth: {
+      mode: "required",
+    },
+    validate: getFindValidate,
+    tags: ["api"],
+  },
+}, {
+  method: "GET",
+  path: "/api/list/{type}",
+  handler: getListHandler,
+  options: {
+    auth: {
+      mode: "required",
+    },
+    validate: getListValidate,
+    tags: ["api"],
+  },
+}];

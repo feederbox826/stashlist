@@ -3,7 +3,6 @@
         <title>stash wishlist</title>
         <style>
             @import url("../assets/list.css");
-            @import url("./wishlist.css");
             @import url("https://stashdb.org/assets/index-0d163314.css");
             @import url("https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css");
         </style>
@@ -16,8 +15,15 @@
                 <a class="nav-link" href="/documentation">API</a>
             </div>
         </nav>
+        <div class="progress">
+            <div class="progress-bar" id="progress-ignore" class="ignore"></div>
+            <div class="progress-bar" id="progress-history" class="history"></div>
+            <div class="progress-bar" id="progress-match" class="match"></div>
+            <div class="progress-bar" id="progress-wish" class="wish"></div>
+            <div class="progress-bar" id="progress-none"></div>
+        </div>
         <main class="MainContent">
-            <div class="scenes-list" id="fav-list"></div>
+            <div class="scenes-list"></div>
             <div id="placeholder">
                 If nothing loads, check your <a style="color: red;" href="/config">config</a>.
             </div>
@@ -61,6 +67,6 @@
         <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
         <script src="../assets/apis.js"></script>
         <script src="../assets/list.js"></script>
-        <script src="./wishlist.js"></script>
+        <script src="./scenelist.js"></script>
     </body>
 </html>

@@ -1,9 +1,9 @@
 // types
 import { createUser } from "../utils/dbUser";
-import { Request, ResponseToolkit } from "@hapi/hapi";
+import { Request, ResponseToolkit, ServerRoute } from "@hapi/hapi";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function createHandler(req: Request, h: ResponseToolkit) {
+async function createHandler(req: Request, h: ResponseToolkit) {
   const registerToken = req.query.token;
   if (
     !registerToken ||
@@ -16,9 +16,29 @@ export async function createHandler(req: Request, h: ResponseToolkit) {
   return userid;
 }
 
-export async function testHandler(req: Request, h: ResponseToolkit) {
+async function testHandler(req: Request, h: ResponseToolkit) {
   if (!req.auth.credentials.userid) {
     return h.response({ error: "Missing ApiKey header" }).code(401);
   }
   return "OK";
 }
+
+export const userRoutes: ServerRoute[] = [{
+  method: "GET",
+  path: "/api/user/create",
+  handler: createHandler,
+  options: {
+    auth: false,
+    tags: ["api"],
+  },
+}, {
+  method: "GET",
+  path: "/api/user/test",
+  handler: testHandler,
+  options: {
+    auth: {
+      mode: "required",
+    },
+    tags: ["api"],
+  },
+}];

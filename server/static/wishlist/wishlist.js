@@ -12,6 +12,25 @@ const localStash = {
     apikey: localStorage.getItem("localstash_apikey"),
     host: localStorage.getItem("localstash_host")
 };
+// sync
+async function sync() {
+    const query = `
+        query FindScenes {
+        findScenes( scene_filter: {
+            stash_id: { value: "" modifier: NOT_NULL }
+        } filter: { per_page: -1 }
+        ) { scenes { stash_ids { stash_id }
+    }}}`;
+    const idlist = await gqlClient(localStash, query, {})
+        .then(data => data.findScenes.scenes)
+        .then(scenes => scenes.map(scene => scene.stash_ids[0].stash_id));
+    // sync to stashlist
+    const saniList = [...new Set(idlist)];
+    // add to log
+    Toastify({ text: `Syncing ${saniList.length} scenes to stashlist`, duration: 3000, position: "right" }).showToast();
+    await stashlist.addbulk(saniList, "history")
+        .then(() => Toastify({ text: `Synced`, duration: 3000, position: "right" }).showToast());
+}
 
 function fetchStashDB(id) {
     const query = `query Scene($id: ID!) {
@@ -24,24 +43,18 @@ function fetchStashDB(id) {
     return gqlClient(stashDB, query, { id })
         .then(data => data.findScene);
 }
-const handleDelete = async (e) => {
+const handleButton = async (e, prompt, type) => {
     e.preventDefault();
     e.stopImmediatePropagation();
     const card = e.target.closest("[data-stash-id]");
     const stashid = card.getAttribute("data-stash-id");
-    if (confirm("Confirm delete?") == false) return;
-    await stashlist.modify(stashid, "delete");
+    if (confirm(prompt) == false) return;
+    await stashlist.modify(stashid, type);
     card.remove();
 };
-const handleHistory = async (e) => {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    const card = e.target.closest("[data-stash-id]");
-    const stashid = card.getAttribute("data-stash-id");
-    if (confirm("Confirm add to History?") == false) return;
-    await stashlist.modify(stashid, "history");
-    card.remove();
-};
+const handleDelete = (e) => handleButton(e, "Confirm delete?", "delete");
+const handleHistory = (e) => handleButton(e, "Confirm add to History?", "history");
+const handleIgnore = (e) => handleButton(e, "Confirm add to Ignore?", "ignore");
 function createDiv(item) {
     const template = document.querySelector("#card-template");
     const clone = template.cloneNode(true);
@@ -67,6 +80,8 @@ function createDiv(item) {
     clone.querySelector(".jackett-search").href = `${jackettUrl}#search=${searchQuery.replace(" ", "+")}`;
     clone.querySelector(".stashlist-btn-remove")
         .addEventListener("click", handleDelete);
+    clone.querySelector(".stashlist-btn-ignore")
+        .addEventListener("click", handleIgnore);
     clone.querySelector(".stashlist-btn-history")
         .addEventListener("click", handleHistory);
     clone.querySelector(".stashlist-btn-copy")
@@ -76,11 +91,6 @@ function createDiv(item) {
     document.getElementById("fav-list")
         .appendChild(clone);
 }
-const fetchWishlist = async () => {
-    const wishIds = await stashlist.getlist("wish");
-    await Promise.all(wishIds.map(id => fetchStashDB(id).then(createDiv)));
-    queryLocalMultiple(wishIds);
-};
 function queryLocal(sceneId) {
     const query = `query find($stash_id: String!) {
         findScenes(scene_filter:
@@ -100,9 +110,14 @@ function queryLocalMultiple(sceneIDs) {
         document.querySelector(`[data-stash-id="${id}"]`).remove();
     });
 }
+const fetchWishlist = async () => {
+    const wishIds = await stashlist.getlist("wish");
+    await Promise.all(wishIds.map(id => fetchStashDB(id).then(createDiv)));
+    queryLocalMultiple(wishIds);
+};
 async function testApis() {
     fetchWishlist();
-    const fetchTest = (url, headers) => fetch(url, { headers }).then(response => response.ok).catch(error => false);
+    const fetchTest = (url, headers) => fetch(url, { headers }).then(response => response.ok).catch(e => false);
     const stashlistOK = await fetchTest(`${stashlist_server.host}/user/test`, { ApiKey: stashlist_server.apikey });
     const stashOK = await fetchTest(`${stashDB.host}?query=query Me { me { id } }`, { ApiKey: stashDB.apikey });
     const localStashOK = await fetchTest(`${localStash.host}?query=query Version { version { version } }`, { ApiKey: localStash.apikey });

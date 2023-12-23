@@ -1,0 +1,57 @@
+.stashlist {
+    border: 5px solid transparent;
+    border-radius: 5px;
+}
+.stashlist.match {
+    border-color: green;
+}
+#progress-match {
+    color: green;
+}
+.stashlist.ignore {
+    border-color: red;
+}
+#progress-ignore {
+    color: red;
+}
+.stashlist.ignore, .stashlist.history img {
+    opacity: 0.25;
+}
+.stashlist.wish {
+    border-color: yellow;
+}
+#progress-wish {
+    color: yellow;
+}
+.stashlist.history {
+    border-color: plum;
+}
+#progress-history {
+    color: plum;
+}
+
+.progress {
+    display: flex;
+    height: 1rem;
+    overflow: hidden;
+    font-size: 0.75rem;
+    background-color: #e9ecef;
+    border-radius: 0.375rem;
+}
+
+.progress-bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #0d6efd;
+    transition: width 0.6s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+    .progress-bar {
+        transition: none;
+    }
+}

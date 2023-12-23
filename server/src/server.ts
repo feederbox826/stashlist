@@ -1,14 +1,13 @@
 // modules
 import Hapi, { Server } from "@hapi/hapi";
-import { join } from "path";
 // hapi plugins
 import Inert from "@hapi/inert";
 import Vision from "@hapi/vision";
 import HapiSwagger from "hapi-swagger";
 import { hapiValidateUser } from "./utils/authenticateUser";
 // routes
-import { createHandler, testHandler } from "./routes/userRoute";
-import * as listRoutes from "./routes/listRoute";
+import { userRoutes } from "./routes/userRoute";
+import { listRoutes } from "./routes/listRoute";
 
 export let server: Server;
 
@@ -56,14 +55,13 @@ export const init = async function () {
       auth: false,
     },
   });
-  // wishlist
+  // static paths
   server.route({
     method: "GET",
     path: "/{filename*}",
     handler: {
       directory: {
         path: ".",
-        index: ["index.html"],
         redirectToSlash: true,
       },
     },
@@ -71,105 +69,10 @@ export const init = async function () {
       auth: false,
     },
   });
-  // /user/create
-  server.route({
-    method: "GET",
-    path: "/api/user/create",
-    handler: createHandler,
-    options: {
-      auth: false,
-      tags: ["api"],
-    },
-  });
-  // /user/test
-  server.route({
-    method: "GET",
-    path: "/api/user/test",
-    handler: testHandler,
-    options: {
-      auth: {
-        mode: "required",
-      },
-      tags: ["api"],
-    },
-  });
-  // /list/all
-  server.route({
-    method: "GET",
-    path: "/api/list/all",
-    handler: listRoutes.getAllHandler,
-    options: {
-      auth: {
-        mode: "required",
-      },
-      tags: ["api"],
-    },
-  });
-  // /list/add/bulk
-  server.route({
-    method: "POST",
-    path: "/api/list/add/bulk",
-    handler: listRoutes.postAddBulkHandler,
-    options: {
-      auth: {
-        mode: "required",
-      },
-      validate: listRoutes.postAddBulkValidate,
-      tags: ["api"],
-    },
-  });
-  // /list/add/{type}
-  server.route({
-    method: "POST",
-    path: "/api/list/add/{type}",
-    handler: listRoutes.postAddHandler,
-    options: {
-      auth: {
-        mode: "required",
-      },
-      validate: listRoutes.postAddValidate,
-      tags: ["api"],
-    },
-  });
-  // /list/find/bulk
-  server.route({
-    method: "POST",
-    path: "/api/list/find/bulk",
-    handler: listRoutes.postFindBulkHandler,
-    options: {
-      auth: {
-        mode: "required",
-      },
-      validate: listRoutes.postFindBulkValidate,
-      tags: ["api"],
-    },
-  });
-  // /list/find/{id}
-  server.route({
-    method: "GET",
-    path: "/api/list/find/{id}",
-    handler: listRoutes.getFindHandler,
-    options: {
-      auth: {
-        mode: "required",
-      },
-      validate: listRoutes.getFindValidate,
-      tags: ["api"],
-    },
-  });
-  // /list/{type}
-  server.route({
-    method: "GET",
-    path: "/api/list/{type}",
-    handler: listRoutes.getListHandler,
-    options: {
-      auth: {
-        mode: "required",
-      },
-      validate: listRoutes.getListValidate,
-      tags: ["api"],
-    },
-  });
+  // /user/*
+  server.route(userRoutes);
+  // /list/*
+  server.route(listRoutes);
   await server.start();
   // eslint-disable-next-line no-console
   console.log(`Server running on ${server.info.uri}`);
