@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist-progress userscript
 // @namespace    feederbox
-// @version      1.0.0
+// @version      1.0.1
 // @description  Add progress bar for stashlist scenes
 // @match        https://stashdb.org/*
 // @connect      http://localhost:9999
@@ -29,61 +29,6 @@ const stashdb = GM_getValue("stashdb", {
 GM_setValue("example_key", { apikey: "xxxx", host: "" });
 
 GM_addStyle(`
-.stashlist {
-  border: 5px solid transparent;
-  border-radius: 5px;
-}
-.stashlist.match {
-  border-color: green;
-}
-.progress-bar.match {
-  background-color: green;
-}
-.stashlist.ignore {
-  border-color: red;
-}
-.progress-bar.ignore {
-  background-color: red;
-}
-.stashlist.ignore img, .stashlist.history img {
-  opacity: 0.25;
-}
-.stashlist.wish {
-  border-color: yellow;
-}
-.progress-bar.wish {
-  background-color: yellow;
-  color: #000;
-}
-.stashlist.history {
-  border-color: plum;
-}
-.progress-bar.history {
-  background-color: plum;
-}
-.stashlist-buttonct {
-  margin-left: 10px;
-  display: flex;
-  flex-direction: row;
-  cursor: pointer;
-  right: 0px;
-  top: 10px;
-  align-self: center;
-}
-.SearchPage-scene .stashlist-btnct {
-  position: absolute;
-}
-.scene-info .stashlist-btnct {
-  display: unset;
-}
-.stashlist-btnct div {
-  padding: 0;
-  border: none;
-  font-size: 20px;
-  display: inherit;
-}
-`);
-GM_addStyle(`
 .progress {
   display: flex;
   height: 1rem;
@@ -91,7 +36,6 @@ GM_addStyle(`
   font-size: 0.75rem;
   border-radius: 0.375rem;
 }
-
 .progress-bar {
   display: flex;
   flex-direction: column;
@@ -103,10 +47,18 @@ GM_addStyle(`
   background-color: #6c757d;
   transition: width 0.6s ease;
 }
-@media (prefers-reduced-motion: reduce) {
-  .progress-bar {
-    transition: none;
-  }
+.progress-bar.match {
+  background-color: green;
+}
+.progress-bar.ignore {
+  background-color: red;
+}
+.progress-bar.wish {
+  background-color: yellow;
+  color: #000;
+}
+.progress-bar.history {
+  background-color: plum;
 }
 `)
 

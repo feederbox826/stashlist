@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.0.4
+// @version      2.0.5
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      http://localhost:9999
@@ -46,7 +46,7 @@ GM_addStyle(`
 .stashlist.history {
   border-color: plum;
 }
-.stashlist-buttonct {
+.stashlist-btnct {
   margin-left: 10px;
   display: flex;
   flex-direction: row;
@@ -54,12 +54,7 @@ GM_addStyle(`
   right: 0px;
   top: 10px;
   align-self: center;
-}
-.SearchPage-scene .stashlist-btnct {
-  position: absolute;
-}
-.scene-info .stashlist-btnct {
-  display: unset;
+  float: inline-end;
 }
 .stashlist-btnct div {
   padding: 0;
