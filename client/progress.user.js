@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist-progress userscript
 // @namespace    feederbox
-// @version      1.0.1
+// @version      1.1.0
 // @description  Add progress bar for stashlist scenes
 // @match        https://stashdb.org/*
 // @connect      http://localhost:9999
@@ -105,13 +105,18 @@ function run() {
   wishBar.classList.add("wish");
   const remainBar = copyBar.cloneNode(true)
   progress.append(copyBar, ignoreBar, historyBar, matchBar, wishBar, remainBar);
+  // add hr if does not exist
+  if (!document.querySelector("hr.my-2")) {
+    const hr = document.createElement("hr");
+    hr.classList.add("my-2");
+    document.querySelector(".NarrowPage").insertBefore(hr, document.querySelector(".nav.nav-tabs"))
+  }
   document.querySelector("hr.my-2").append(progress)
 
-  async function performerQuery() {
-    // get count
+  async function fetchQuery(performers, studios) {
     let count = 0;
     let ids = [];
-    await gqlClient(stashdb, sceneQuery, { page: 1, performers: [id] })
+    await gqlClient(stashdb, sceneQuery, { page: 1, performers, studios })
       .then(data => {
         count = data.queryScenes.count
         ids.push(...data.queryScenes.scenes.map(scene => scene.id))
@@ -119,9 +124,15 @@ function run() {
     // calculate page
     const pages = Math.ceil(count / 50);
     for (let i = 2; i <= pages; i++) {
-      await queryScene(i, [id])
+      await queryScene(i, performers, studios)
         .then(data => ids.push(...data));
     }
+    return { count, ids }
+  }
+
+  async function bulkQuery(performers, studios) {
+    // get count
+    let { count, ids } = await fetchQuery(performers, studios)
     console.log("final ids", ids)
     // get stashlist from server
     console.log("final ids length", ids.length)
@@ -155,7 +166,9 @@ function run() {
   const id = pathArray[2]
 
   if (type == "performers") {
-    performerQuery()
+    bulkQuery([id], [])
+  } else if (type == "studios") {
+    bulkQuery([], [id]) 
   }
 }
-wfke("hr.my-2", run)
+wfke(".nav.nav-tabs", run)
