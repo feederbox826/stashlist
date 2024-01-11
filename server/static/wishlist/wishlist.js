@@ -52,7 +52,7 @@ const handleButton = async (e, prompt, type) => {
     await stashlist.modify(stashid, type);
     card.remove();
 };
-const handleDelete = (e) => handleButton(e, "Confirm delete?", "delete");
+const handleDelete = (e) => handleButton(e, "Confirm delete?", "remove");
 const handleHistory = (e) => handleButton(e, "Confirm add to History?", "history");
 const handleIgnore = (e) => handleButton(e, "Confirm add to Ignore?", "ignore");
 function createDiv(item) {
