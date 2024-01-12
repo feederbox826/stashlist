@@ -17,7 +17,7 @@ async function sync() {
     const query = `
         query FindScenes {
         findScenes( scene_filter: {
-            stash_id_endpoint: { value: "" modifier: NOT_NULL }
+            stash_id_endpoint: { modifier: NOT_NULL }
         } filter: { per_page: -1 }
         ) { scenes { stash_ids { stash_id }
     }}}`;
@@ -95,7 +95,7 @@ function queryLocal(sceneId) {
     const query = `query find($stash_id: String!) {
         findScenes(scene_filter:
             { stash_id_endpoint:
-                { value: $stash_id modifier: EQUALS }
+                { stash_id: $stash_id modifier: EQUALS }
         })
         { scenes { id } }
     }`;

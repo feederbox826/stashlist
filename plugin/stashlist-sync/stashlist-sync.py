@@ -22,7 +22,7 @@ def processScene(s):
             return
 
 def syncall():
-    scenes=stash.find_scenes(f={"stash_id_endpoint":{"value":"","modifier":"NOT_NULL"}},filter={"per_page": -1})
+    scenes=stash.find_scenes(f={"stash_id_endpoint":{"modifier":"NOT_NULL"}},filter={"per_page": -1})
     count = len(scenes)
     log.info(str(count)+' scenes to sync.')
     ids = []

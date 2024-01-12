@@ -49,7 +49,7 @@ function queryLocal(sceneId) {
   const query = `query find($stash_id: String!) {
   findScenes(scene_filter: {
     stash_id_endpoint: {
-    value: $stash_id modifier: EQUALS
+    stash_id: $stash_id modifier: EQUALS
   }})
   { scenes { id } }}`;
   const variables = { stash_id: sceneId };
