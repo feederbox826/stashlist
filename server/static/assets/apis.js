@@ -8,6 +8,16 @@ function gqlClient(instance, query, variables) {
         .then(response => response.json())
         .then(data => data.data);
 }
+function gqlClientCache(instance, query, variables) {
+  const options = {
+      method: "GET",
+      headers: { "ApiKey": instance.apikey },
+  };
+  const params = new URLSearchParams({ query: query.replace(/\++/, "+"), variables: JSON.stringify(variables) })
+  return fetch(`${instance.host}?${params}`, options)
+      .then(response => response.json())
+      .then(data => data.data);
+}
 
 const stashlistClient = (method = "GET", path, overrides) => {
     const params = new URLSearchParams(overrides?.params ?? {});
@@ -38,7 +48,7 @@ const stashlist = {
 function queryLocal(sceneId) {
   const query = `query find($stash_id: String!) {
   findScenes(scene_filter: {
-    stash_id: {
+    stash_id_endpoint: {
     value: $stash_id modifier: EQUALS
   }})
   { scenes { id } }}`;
