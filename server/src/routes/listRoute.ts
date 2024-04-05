@@ -21,8 +21,10 @@ function postAddBulkHandler(req: Request, h: ResponseToolkit) {
   const payload = req.payload as { stashids: string[]; type: string };
   const stashids: string[] = payload.stashids;
   const listtype: listTypeEnum = listTypeEnum[payload.type];
+  // deduplicate stashids list
+  const stashidssani = [...new Set(stashids)];
   // run
-  list.addToListBulk(userid, stashids, listtype);
+  list.addToListBulk(userid, stashidssani, listtype);
   return { message: `added ${stashids.length} items to ${payload.type} list` };
 }
 const postAddBulkValidate = {
