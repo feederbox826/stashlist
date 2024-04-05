@@ -4,10 +4,8 @@ import sys
 import requests
 import json
 
-from config import stashlist_apikey, stashlist_endpoint
-
+stashlist_endpoint = "https://list.feederbox.cc"
 request_s = requests.Session()
-request_s.headers.update({"ApiKey": stashlist_apikey})
 
 def processScene(s):
     if len(s['stash_ids']) == 0:
@@ -40,6 +38,11 @@ def syncall():
 json_input = json.loads(sys.stdin.read())
 FRAGMENT_SERVER = json_input["server_connection"]
 stash = StashInterface(FRAGMENT_SERVER)
+
+config = stash.get_configuration()
+stashlist = config["plugins"]["stashlist-sync"]
+log.info(stashlist)
+request_s.headers.update({"ApiKey": stashlist["stashlistApikey"]})
 
 if 'mode' in json_input['args']:
     PLUGIN_ARGS = json_input['args']["mode"]

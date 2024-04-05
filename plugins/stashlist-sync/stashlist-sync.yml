@@ -19,4 +19,4 @@ tasks:
 settings:
   stashlist_apikey:
     displayName: stashlist ApiKey
-    type: string
+    type: STRING
