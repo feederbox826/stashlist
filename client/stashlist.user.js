@@ -4,21 +4,27 @@
 // @version      2.0.5
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
-// @connect      http://localhost:9999
+// @connect      localhost:9999
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @grant        GM_xmlhttpRequest
 // @run-at       document-idle
 // @author       feederbox826
 // @updateURL    https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
 // @downloadURL  https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
 // @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
+// @require      https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js
+// @require      https://cdn.jsdelivr.net/npm/@trim21/gm-fetch
 // ==/UserScript==
 "use strict";
 
+// force polyfill
+fetch = GM_fetch;
+
 const stashlist_server = GM_getValue("stashlist_server", {
   apikey: "xxxx",
-  host: "",
+  host: "https://list.feederbox.cc",
 });
 const localStash = GM_getValue("localStash", {
   apikey: "",
@@ -85,11 +91,21 @@ let isSearch = location.href.includes("/search/");
 let isScene = location.href.includes("/scenes/");
 let selector = selectorObj.default;
 
+const zip = (a, b) => a.map((k, i) => [k, b[i]]);
+
 function setupPage() {
   paginationObserved = false;
   isSearch = location.href.includes("/search/");
   isScene = location.href.includes("/scenes/");
   selector = chooseSelector();
+  // add sync
+  const newSync = document.createElement("a");
+  newSync.onclick = cacheLocal;
+  newSync.textContent = "Sync";
+  newSync.classList = "nav-link";
+  newSync.id = "sync";
+  if (document.querySelector(".navbar-nav #sync")) return;
+  document.querySelector(".navbar-nav").append(newSync);
 }
 
 // wait for visible key elements
@@ -108,20 +124,46 @@ function applyBulkMark(sceneIDs, type) {
   });
 }
 
-function queryLocalScenes(sceneIDs) {
-  const otherClasses = ["ignore", "wish", "history"];
-  sceneIDs.forEach(async (id) => {
-    const localScenes = await queryLocal(id);
-    if (localScenes.length == 0) return;
-    const scene = document.querySelector(`[data-stash-id="${id}"]`);
-    addMatch(scene, localScenes[0].id);
-    scene.classList.add("match");
-    if (otherClasses.some((elem) => scene.classList.contains(elem))) {
-      await stashlist.modify(id, "history");
-      console.log("removing classes")
-      scene.classList.remove(...otherClasses);
-    }
-  });
+async function queryLocalScenes(sceneIDs) {
+    const otherClasses = ["ignore", "wish", "history"];
+    const localIDs = await idbKeyval.getMany(sceneIDs)
+    zip(sceneIDs, localIDs)
+        .filter(i => i[1])
+        .map(i => {
+            const scene = document.querySelector(`[data-stash-id="${i[0]}"]`)
+            addMatch(scene, i[1])
+            scene.classList.add("match")
+            if (otherClasses.some(elem => scene.classList.contains(elem))) {
+                stashlist.modify(i[0], "history")
+                scene.classList.remove(...otherClasses)
+            }
+        })
+}
+
+async function fetchLocal() {
+  const query = `
+      query FindScenes {
+      findScenes( scene_filter: {
+          stash_id_endpoint: { modifier: NOT_NULL }
+      } filter: { per_page: -1 }
+      ) { scenes { id stash_ids { stash_id }
+  }}}`;
+  const idMap = []
+  const idLocal = await gqlClient(localStash, query, {})
+      .then(data => data.findScenes.scenes)
+  idLocal.forEach(scene => idMap.push([scene.stash_ids[0].stash_id, scene.id]))
+  // sync to stashlist
+  return idMap
+}
+
+async function cacheLocal() {
+  const idMap = await fetchLocal()
+  //clear
+  await idbKeyval.clear()
+  // add in bulk
+  idbKeyval.setMany(idMap)
+  console.log("syncing with local")
+  alert(`Synced ${idMap.length} scenes from local stashapp`)
 }
 
 const chooseSelector = () =>
@@ -159,9 +201,7 @@ function markScenes() {
     applyBulkMark(results.ignore, "ignore");
     applyBulkMark(results.wish, "wish");
     applyBulkMark(results.history, "history")
-  });
-  // query individual scenes
-  queryLocalScenes(stashids);
+  }).then(() => queryLocalScenes(stashids))
 }
 
 function addButton(scene, type, text, onclick) {
