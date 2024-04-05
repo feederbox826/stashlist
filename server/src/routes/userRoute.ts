@@ -6,9 +6,8 @@ import { Request, ResponseToolkit, ServerRoute } from "@hapi/hapi";
 async function createHandler(req: Request, h: ResponseToolkit) {
   const registerToken = req.query.token;
   if (
-    !registerToken ||
-    (process.env.REGISTRATION != "OPEN" &&
-      registerToken != process.env.REGISTRATION)
+    process.env.REGISTRATION != "OPEN" &&
+      registerToken != process.env.REGISTRATION
   ) {
     return h.response({ error: "Registration not open" }).code(401);
   }
