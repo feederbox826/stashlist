@@ -118,9 +118,9 @@ const fetchWishlist = async () => {
 async function testApis() {
     fetchWishlist();
     const fetchTest = (url, headers) => fetch(url, { headers }).then(response => response.ok).catch(e => false);
-    const stashlistOK = await fetchTest(`${stashlist_server.host}/user/test`, { ApiKey: stashlist_server.apikey });
+    const stashlistOK = await fetchTest(`${stashlist_server.host}/api/user/test`, { ApiKey: stashlist_server.apikey });
     const stashOK = await fetchTest(`${stashDB.host}?query=query Me { me { id } }`, { ApiKey: stashDB.apikey });
-    const localStashOK = await fetchTest(`${localStash.host}?query=query Version { version { version } }`, { ApiKey: localStash.apikey });
+    const localStashOK = await fetchTest(`${localStash.host}graphql/?query=query Version { version { version } }`, { ApiKey: localStash.apikey });
     const placeholder = document.getElementById("placeholder");
     function addWarning(name, status) {
         const warning = document.createElement("p");
