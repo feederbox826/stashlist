@@ -29,19 +29,19 @@ const stashlistClient = (method = "GET", path, overrides) => {
 };
 
 const stashlist = {
-    addbulk: (ids, list) => stashlistClient("POST", "/list/add/bulk", {
+    addbulk: (ids, list) => stashlistClient("POST", "/api/list/add/bulk", {
         body: JSON.stringify({ stashids: ids, type: list })
     }),
-    modify: (id, list) => stashlistClient("POST", `/list/add/${list}`, {
+    modify: (id, list) => stashlistClient("POST", `/api/list/add/${list}`, {
         params: { stashid: id }
     }),
-    findBulk: (ids) => stashlistClient("POST", "/list/find/bulk", {
+    findBulk: (ids) => stashlistClient("POST", "/api/list/find/bulk", {
         body: JSON.stringify({ stashids: ids })
     })
       .then(res => res.json()),
-    find: (id) => stashlistClient("GET", `/list/find/${id}`)
+    find: (id) => stashlistClient("GET", `/api/list/find/${id}`)
       .then(res => res.json()),
-    getlist: (list) => stashlistClient("GET", `/list/${list}`)
+    getlist: (list) => stashlistClient("GET", `/api/list/${list}`)
       .then(res => res.json()),
 };
 
