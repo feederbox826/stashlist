@@ -20,6 +20,26 @@
 // ==/UserScript==
 "use strict";
 
+// monkeypatch window fetch to intercept graphQL requests
+const { fetch: originalFetch } = unsafeWindow;
+
+const gqlListener = new EventTarget();
+unsafeWindow.fetch = async (...args) => {
+  let [resource, config ] = args;
+  // request interceptor here
+  const response = await originalFetch(resource, config);
+  // response interceptor here
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.indexOf("application/json") !== -1 && typeof resource === "string" && resource.endsWith('/graphql')) {
+      try {
+          const data = await response.clone().json();
+          gqlListener.dispatchEvent(new CustomEvent('response', { 'detail': data }));
+      }
+      catch (e) { console.erro(e) }
+  }
+  return response;
+};
+
 // force polyfill
 fetch = GM_fetch;
 
@@ -44,7 +64,10 @@ GM_addStyle(`
 .stashlist.ignore {
   border-color: red;
 }
-.stashlist.ignore img, .stashlist.history img {
+.stashlist.filter {
+  border-color: grey;
+}
+.stashlist.ignore img, .stashlist.history img, .stashlist.filter {
   opacity: 0.25;
 }
 .stashlist.wish {
@@ -126,7 +149,7 @@ function applyBulkMark(sceneIDs, type) {
 }
 
 async function queryLocalScenes(sceneIDs) {
-    const otherClasses = ["ignore", "wish", "history"];
+    const otherClasses = ["ignore", "wish", "history", "filter"];
     const localIDs = await idbKeyval.getMany(sceneIDs)
     zip(sceneIDs, localIDs)
         .filter(i => i[1])
@@ -180,6 +203,25 @@ const getID = (scene) =>
     : isScene
       ? new URL(location.href).pathname.split("/").pop()
       : scene.querySelector(".d-flex a.text-truncate").href.split("/").pop();
+
+gqlListener.addEventListener("response", async (e) => {
+  if (e.detail.data.queryScenes) {
+    console.log("queryScenes received");
+    const scenes = e.detail.data.queryScenes.scenes;
+    const ignorePerformers = await stashlist.getlist("ignorePerformer")
+    const ignoreStudios = await stashlist.getlist("ignoreStudio")
+    scanGqlFilter(scenes, ignorePerformers, ignoreStudios);
+  }
+})
+
+function scanGqlFilter(scenes, ignorePerformers, ignoreStudios) {
+  for (const scene of scenes) {
+    if (scene.performers.some(p => ignorePerformers.includes(p.performer.id)) || ignoreStudios.includes(scene.studio.id)) {
+      const sceneCard = document.querySelector(`[data-stash-id="${scene.id}"]`);
+      sceneCard.classList.add("filter");
+    }
+  }
+}
 
 function markScenes() {
   console.log("run");
