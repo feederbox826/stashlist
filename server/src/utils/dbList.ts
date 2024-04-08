@@ -26,6 +26,8 @@ export const getAllLists = async (
     wish: [],
     ignore: [],
     history: [],
+    ignorePerformer: [],
+    ignoreStudio: [],
   };
   for (const type of listTypeValueArr) {
     const listName = listTypeEnum[type];
@@ -96,6 +98,8 @@ export const findItems = async (
     wish: [],
     ignore: [],
     history: [],
+    ignorePerformer: [],
+    ignoreStudio: [],
   };
   dbResult.forEach((item) => {
     const typeString = listTypeEnum[item.listtype];
