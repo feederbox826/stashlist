@@ -32,6 +32,9 @@ const stashlist = {
     addbulk: (ids, list) => stashlistClient("POST", "/api/list/add/bulk", {
         body: JSON.stringify({ stashids: ids, type: list })
     }),
+    add: (id, list) => stashlistClient("POST", `/api/list/add/${list}`, {
+        params: { stashid: id }
+    }),
     modify: (id, list) => stashlistClient("POST", `/api/list/add/${list}`, {
         params: { stashid: id }
     }),
