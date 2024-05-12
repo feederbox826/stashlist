@@ -51,5 +51,5 @@ if 'mode' in json_input['args']:
 elif 'hookContext' in json_input['args']:
     id=json_input['args']['hookContext']['id']
     scene=stash.find_scene(id)
-    log.info('adding history for scene: ' + id)
+    log.info('adding history for scene: ' + str(id))
     processScene(scene)
