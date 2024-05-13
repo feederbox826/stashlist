@@ -41,7 +41,6 @@ stash = StashInterface(FRAGMENT_SERVER)
 
 config = stash.get_configuration()
 stashlist = config["plugins"]["stashlist-sync"]
-log.info(stashlist)
 request_s.headers.update({"ApiKey": stashlist["stashlistApikey"]})
 
 if 'mode' in json_input['args']:
@@ -51,5 +50,5 @@ if 'mode' in json_input['args']:
 elif 'hookContext' in json_input['args']:
     id=json_input['args']['hookContext']['id']
     scene=stash.find_scene(id)
-    log.info('adding history for scene: ' + str(id))
+    log.debug('adding history for scene: ' + str(id))
     processScene(scene)
