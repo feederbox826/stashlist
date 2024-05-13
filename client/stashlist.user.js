@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.2.0
+// @version      2.2.1
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -14,31 +14,12 @@
 // @author       feederbox826
 // @updateURL    https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
 // @downloadURL  https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
+// @require      https://raw.githubusercontent.com/feederbox826/plugins/main/requires/gql-intercept.js
 // @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
 // @require      https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js
 // @require      https://cdn.jsdelivr.net/npm/@trim21/gm-fetch
 // ==/UserScript==
 "use strict";
-
-// monkeypatch window fetch to intercept graphQL requests
-const { fetch: originalFetch } = unsafeWindow;
-
-const gqlListener = new EventTarget();
-unsafeWindow.fetch = async (...args) => {
-  let [resource, config ] = args;
-  // request interceptor here
-  const response = await originalFetch(resource, config);
-  // response interceptor here
-  const contentType = response.headers.get("content-type");
-  if (contentType && contentType.indexOf("application/json") !== -1 && typeof resource === "string" && resource.endsWith('/graphql')) {
-      try {
-          const data = await response.clone().json();
-          gqlListener.dispatchEvent(new CustomEvent('response', { 'detail': data }));
-      }
-      catch (e) { console.erro(e) }
-  }
-  return response;
-};
 
 // force polyfill
 fetch = GM_fetch;
