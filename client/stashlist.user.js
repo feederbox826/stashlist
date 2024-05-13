@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.2.1
+// @version      2.2.2
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -14,7 +14,7 @@
 // @author       feederbox826
 // @updateURL    https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
 // @downloadURL  https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
-// @require      https://raw.githubusercontent.com/feederbox826/plugins/main/requires/gql-intercept.js
+// @require      https://raw.githubusercontent.com/feederbox826/userscripts/main/requires/gql-intercept.js
 // @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
 // @require      https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js
 // @require      https://cdn.jsdelivr.net/npm/@trim21/gm-fetch
@@ -56,22 +56,6 @@ GM_addStyle(`
 }
 .stashlist.history {
   border-color: plum;
-}
-.stashlist-btnct {
-  margin-left: 10px;
-  display: flex;
-  flex-direction: row;
-  cursor: pointer;
-  right: 0px;
-  top: 10px;
-  align-self: center;
-  float: inline-end;
-}
-.stashlist-btnct div {
-  padding: 0;
-  border: none;
-  font-size: 20px;
-  display: inherit;
 }
 `);
 
