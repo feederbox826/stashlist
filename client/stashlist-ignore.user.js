@@ -50,6 +50,14 @@ function setupPage() {
     ignoreButton.textContent = "Ignore"
     if (document.querySelector("#ignoreButton")) return;
     parent.prepend(ignoreButton)
+    // check if ignored
+    let id = location.pathname.split("/").pop();
+    stashlist.find(id).then(data => {
+      if (data.type == "ignorePerformer" || data.type == "ignoreStudio") {
+        ignoreButton.textContent = "Ignored";
+        ignoreButton.disabled = true;
+      }
+    })
 }
 
 function runPage() {
