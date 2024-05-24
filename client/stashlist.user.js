@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.2.2
+// @version      2.2.3
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -47,9 +47,18 @@ GM_addStyle(`
 }
 .stashlist.filter {
   border-color: grey;
+  &.performer.studio {
+    border-style: double;
+  }
+  &.studio {
+    border-style: dotted;
+  }
+  &.performer {
+    border-style: dashed;
+  }
 }
 .stashlist.ignore img, .stashlist.history img, .stashlist.filter {
-  opacity: 0.25;
+  opacity: 0.3;
 }
 .stashlist.wish {
   border-color: yellow;
@@ -181,9 +190,13 @@ gqlListener.addEventListener("response", async (e) => {
 
 function scanGqlFilter(scenes, ignorePerformers, ignoreStudios) {
   for (const scene of scenes) {
-    if (scene.performers.some(p => ignorePerformers.includes(p.performer.id)) || ignoreStudios.includes(scene.studio.id)) {
+    const perfMatch = scene.performers.some(p => ignorePerformers.includes(p.performer.id))
+    const studioMatch = ignoreStudios.includes(scene.studio.id)
+    if (perfMatch || studioMatch) {
       const sceneCard = document.querySelector(`[data-stash-id="${scene.id}"]`);
       sceneCard.classList.add("filter");
+      if (perfMatch) sceneCard.classList.add("performer");
+      if (studioMatch) sceneCard.classList.add("studio");
     }
   }
 }
