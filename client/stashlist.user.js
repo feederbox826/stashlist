@@ -12,6 +12,7 @@
 // @grant        GM_xmlhttpRequest
 // @run-at       document-idle
 // @author       feederbox826
+// @licence      MIT
 // @updateURL    https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
 // @downloadURL  https://github.com/feederbox826/stashlist/raw/main/client/stashlist.user.js
 // @require      https://raw.githubusercontent.com/feederbox826/userscripts/main/requires/gql-intercept.js

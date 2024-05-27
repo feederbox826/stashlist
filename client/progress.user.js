@@ -10,6 +10,7 @@
 // @grant        GM_setValue
 // @run-at       document-idle
 // @author       feederbox826
+// @licence      MIT
 // @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
 // ==/UserScript==
 "use strict";

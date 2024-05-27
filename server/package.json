@@ -22,6 +22,7 @@
 		"prettify": "prettier --write \"src/**/*.ts\""
 	},
 	"private": true,
+	"licence": "MIT",
 	"devDependencies": {
 		"@types/node": "^20.10.5",
 		"@types/uuid": "^9.0.7",
