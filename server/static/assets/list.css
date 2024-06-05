@@ -1,5 +1,5 @@
 .hidden, #card-template {
-    display: none;
+    display: none !important;
 }
 #fav-list {
     padding: 16px;
