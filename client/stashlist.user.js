@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.2.4
+// @version      2.3.0
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -91,6 +91,8 @@ const selectorObj = {
 let paginationObserved = false;
 let isSearch = location.href.includes("/search/");
 let isScene = location.href.includes("/scenes/");
+let isPerformer = location.href.includes("/performers/");
+let isStudio = location.href.includes("/studios/");
 let selector = selectorObj.default;
 let ignorePerformers = false;
 let ignoreStudios = false;
@@ -104,7 +106,6 @@ function wfke(selector, callback) {
   if (el) return callback();
   setTimeout(wfke, 100, selector, callback);
 }
-
 
 const chooseSelector = () =>
   isSearch
@@ -125,7 +126,10 @@ function setupPage() {
   paginationObserved = false;
   isSearch = location.href.includes("/search/");
   isScene = location.href.includes("/scenes/");
+  isPerformer = location.href.includes("/performers/");
+  isStudio = location.href.includes("/studios/");
   selector = chooseSelector();
+  if (isPerformer || isStudio) addIgnoreButton();
 }
 
 // fetching functions
@@ -156,7 +160,7 @@ async function cacheLocal() {
   const idLocal = await gqlClient(localStash, query, {}).then(
     (data) => data.findScenes.scenes,
   );
-  const idMap = idLocal.map(scene => [scene.stash_ids[0].stash_id, scene.id])
+  const idMap = idLocal.map((scene) => [scene.stash_ids[0].stash_id, scene.id]);
   // sync to stashlist
   // clear
   await idbKeyval.clear();
@@ -329,6 +333,35 @@ function observePerformers() {
     { attributes: true, subtree: true },
   );
   paginationObserved = true;
+}
+
+function ignoreStudioPerformer(e) {
+  let id = location.pathname.split("/").pop();
+  let type = isPerformer ? "ignorePerformer" : "ignoreStudio";
+  console.log(`ignoring ${type} ${id}`);
+  stashlist.add(id, type);
+  e.target.textContent = "Ignored";
+  e.target.disabled = true;
+}
+
+function addIgnoreButton() {
+  const parent = document.querySelector("div:has(>.ms-2)");
+  if (!parent) return;
+  const ignoreButton = document.createElement("button");
+  ignoreButton.className = "btn btn-outline-danger ms-2";
+  ignoreButton.id = "ignoreButton";
+  ignoreButton.onclick = ignoreStudioPerformer;
+  ignoreButton.textContent = "Ignore";
+  if (document.querySelector("#ignoreButton")) return;
+  parent.prepend(ignoreButton);
+  // check if ignored
+  let id = location.pathname.split("/").pop();
+  stashlist.find(id).then((data) => {
+    if (data.type == "ignorePerformer" || data.type == "ignoreStudio") {
+      ignoreButton.textContent = "Ignored";
+      ignoreButton.disabled = true;
+    }
+  });
 }
 
 function runPage() {
