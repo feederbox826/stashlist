@@ -46,9 +46,6 @@ const stashlist = {
       .then(res => res.json()),
     getlist: (list) => stashlistClient("GET", `/api/list/${list}`)
       .then(res => res.json()),
-    remove: (id) => stashlistClient("POST", "/api/list/remove", {
-        params: { stashid: id }
-    }),
 };
 
 function queryLocal(sceneId) {
