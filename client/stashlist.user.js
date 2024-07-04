@@ -350,6 +350,14 @@ function ignoreStudioPerformer(e) {
   e.target.disabled = true;
 }
 
+function clearStudioPerformer(e) {
+  let id = location.pathname.split("/").pop();
+  console.log(`clearing ${id}`);
+  stashlist.remove(id);
+  e.target.textContent = "Cleared";
+  e.target.disabled = true;
+}
+
 function addIgnoreButton() {
   const parent = document.querySelector("div:has(>.ms-2)");
   if (!parent) return;
@@ -358,14 +366,21 @@ function addIgnoreButton() {
   ignoreButton.id = "ignoreButton";
   ignoreButton.onclick = ignoreStudioPerformer;
   ignoreButton.textContent = "Ignore";
-  if (document.querySelector("#ignoreButton")) return;
-  parent.prepend(ignoreButton);
+  const clearButton = document.createElement("button");
+  clearButton.className = "btn btn-outline-danger ms-2";
+  clearButton.id = "clearButton";
+  clearButton.onclick = clearStudioPerformer;
+  clearButton.textContent = "Clear";
+  clearButton.style.display = "none";
+  if (!document.querySelector("#ignoreButton")) parent.prepend(ignoreButton);
+  if (!document.querySelector("#clearButton")) parent.prepend(clearButton);
   // check if ignored
   let id = location.pathname.split("/").pop();
   stashlist.find(id).then((data) => {
     if (data.type == "ignorePerformer" || data.type == "ignoreStudio") {
       ignoreButton.textContent = "Ignored";
       ignoreButton.disabled = true;
+      clearButton.style.display = "ineline-block";
     }
   });
 }
