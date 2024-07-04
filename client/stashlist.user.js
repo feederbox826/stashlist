@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.3.1
+// @version      2.3.2
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -56,6 +56,10 @@ GM_addStyle(`
   }
   &.studio {
     border-style: dotted;
+
+    .text-muted>a, h6>a {
+      color: red;
+    }
   }
   &.performer {
     border-style: dashed;
@@ -69,6 +73,9 @@ GM_addStyle(`
 }
 .stashlist.history {
   border-color: plum;
+}
+.scene-info.card a.scene-performer.filter {
+  color: red;
 }
 `);
 
@@ -206,18 +213,13 @@ function scanGqlFilter(scenes) {
       const sceneCard = document.querySelector(`[data-stash-id="${scene.id}"]`);
       sceneCard.classList.add("filter");
       if (perfMatch) sceneCard.classList.add("performer");
-      if (studioMatch) {
-        sceneCard.classList.add("studio");
-        // highligh studio as red
-        document.querySelector(".text-muted>a[href^='/studios/']").style.color = "red";
-      }
+      if (studioMatch) sceneCard.classList.add("studio");
     }
   }
 }
 
 function markSingleCard(scene) {
   // mark ignored studio and performers in red
-  document.querySelector('h6>a[href^="/studios/"]').style.color = "red";
   // iterate over matched performers
   scene.performers
     .filter((p) => ignorePerformers.includes(p.performer.id))
@@ -225,8 +227,8 @@ function markSingleCard(scene) {
       (perf) =>
         (document.querySelector(
           `a.scene-performer[href="/performers/${perf.performer.id}"]`,
-        ).style.color = "red"),
-    );
+        ).classList.add("filter")
+    ));
 }
 
 function markScenes() {
