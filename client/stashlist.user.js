@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.3.2
+// @version      2.3.4
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -353,7 +353,7 @@ function ignoreStudioPerformer(e) {
 function clearStudioPerformer(e) {
   let id = location.pathname.split("/").pop();
   console.log(`clearing ${id}`);
-  stashlist.remove(id);
+  stashlist.add(id, "remove");
   e.target.textContent = "Cleared";
   e.target.disabled = true;
 }
@@ -380,7 +380,7 @@ function addIgnoreButton() {
     if (data.type == "ignorePerformer" || data.type == "ignoreStudio") {
       ignoreButton.textContent = "Ignored";
       ignoreButton.disabled = true;
-      clearButton.style.display = "ineline-block";
+      clearButton.style.display = "inline-block";
     }
   });
 }
