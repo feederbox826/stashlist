@@ -180,23 +180,23 @@ function applyBulkMark(sceneIDs, type) {
 
 // event running and listeners
 gqlListener.addEventListener("response", async (e) => {
-  if (!ignorePerformers && !ignoreStudios) await setupStashlist();
+  if (!ignorePerformers || !ignoreStudios) await setupStashlist();
   if (e.detail.data.queryScenes) {
     console.log("queryScenes received");
     const scenes = e.detail.data.queryScenes.scenes;
-    scanGqlFilter(scenes, ignorePerformers, ignoreStudios);
+    scanGqlFilter(scenes);
   } else if (e.detail.data.findScene) {
     console.log("findScene received");
     const scene = e.detail.data.findScene;
     // check if studio or performers are ignored
     wfke(".scene-info.card", () => {
-      scanGqlFilter([scene], ignorePerformers, ignoreStudios);
-      markSingleCard(scene, ignorePerformers);
+      scanGqlFilter([scene]);
+      markSingleCard(scene);
     });
   }
 });
 
-function scanGqlFilter(scenes, ignorePerformers, ignoreStudios) {
+function scanGqlFilter(scenes) {
   for (const scene of scenes) {
     const perfMatch = scene.performers.some((p) =>
       ignorePerformers.includes(p.performer.id),
@@ -211,7 +211,7 @@ function scanGqlFilter(scenes, ignorePerformers, ignoreStudios) {
   }
 }
 
-function markSingleCard(scene, ignorePerformers) {
+function markSingleCard(scene) {
   // mark ignored studio and performers in red
   document.querySelector('h6>a[href^="/studios/"]').style.color = "red";
   // iterate over matched performers
