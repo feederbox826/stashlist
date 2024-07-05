@@ -38,19 +38,27 @@ GM_setValue("example_key", { apikey: "xxxx", host: "" });
 
 // styling
 GM_addStyle(`
+:root {
+  --stashlist-ignore: red;
+  --stashlist-filter: grey;
+  --stashlist-wish: yellow;
+  --stashlist-history: plum;
+  --stashlist-match: green;
+  --stashlist-ignore-opacity: 0.3;
+}
 .stashlist {
   border: 5px solid transparent;
   border-radius: 5px;
 }
 .stashlist.match {
-  border-color: green !important;
+  border-color: var(--stashlist-match) !important;
   opacity: 1 !important;
 }
 .stashlist.ignore {
-  border-color: red;
+  border-color: var(--stashlist-ignore);
 }
 .stashlist.filter {
-  border-color: grey;
+  border-color: var(--stashlist-filter);
   &.performer.studio {
     border-style: double;
   }
@@ -58,24 +66,24 @@ GM_addStyle(`
     border-style: dotted;
 
     .text-muted>a, h6>a {
-      color: red;
+      color: var(--stashlist-ignore);
     }
   }
   &.performer {
     border-style: dashed;
   }
 }
-.stashlist.ignore img, .stashlist.history img, .stashlist.filter {
-  opacity: 0.3;
+.stashlist.ignore img, .stashlist.history img, .stashlist.filter img {
+  opacity: var(--stashlist-ignore-opacity);
 }
 .stashlist.wish {
-  border-color: yellow;
+  border-color: var(--stashlist-wish);
 }
 .stashlist.history {
-  border-color: plum;
+  border-color: var(--stashlist-history);
 }
 .scene-info.card a.scene-performer.filter {
-  color: red;
+  color: var(--stashlist-ignore);
 }
 `);
 
@@ -385,6 +393,16 @@ function addIgnoreButton() {
   });
 }
 
+const keyListener = (e) => {
+  if (e.key === "V" && e.shiftKey && !e.repeat) {
+    const opacityKey = "--stashlist-ignore-opacity";
+    const root = document.querySelector(":root")
+    const current = root.style.getPropertyValue(opacityKey);
+    const newOpacity = current == 1 ? 0.3 : 1;
+    root.style.setProperty(opacityKey, newOpacity);
+  }
+}
+
 function runPage() {
   console.log("runpage");
   setupPage();
@@ -403,3 +421,5 @@ new MutationObserver(() => runPage()).observe(document.querySelector("title"), {
 });
 runPage();
 setupStashlist();
+// listen for `v` keypress to toggle visibility
+document.addEventListener("keydown", keyListener);
