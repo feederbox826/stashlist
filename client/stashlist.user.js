@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.3.4
+// @version      2.4.0
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -109,8 +109,8 @@ let isScene = location.href.includes("/scenes/");
 let isPerformer = location.href.includes("/performers/");
 let isStudio = location.href.includes("/studios/");
 let selector = selectorObj.default;
-let ignorePerformers = false;
-let ignoreStudios = false;
+let ignorePerformers = localStorage.getItem("ignorePerformer")
+let ignoreStudios = localStorage.getItem("ignoreStudio")
 
 // helper functions
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
@@ -384,13 +384,11 @@ function addIgnoreButton() {
   if (!document.querySelector("#clearButton")) parent.prepend(clearButton);
   // check if ignored
   let id = location.pathname.split("/").pop();
-  stashlist.find(id).then((data) => {
-    if (data.type == "ignorePerformer" || data.type == "ignoreStudio") {
+  if (ignorePerformers.includes(id) || ignoreStudios.includes(id)) {
       ignoreButton.textContent = "Ignored";
       ignoreButton.disabled = true;
       clearButton.style.display = "inline-block";
-    }
-  });
+  }
 }
 
 const keyListener = (e) => {
@@ -411,8 +409,12 @@ function runPage() {
   wfke("ul.pagination", observePerformers);
 }
 async function setupStashlist() {
-  ignorePerformers = await stashlist.getlist("ignorePerformer");
-  ignoreStudios = await stashlist.getlist("ignoreStudio");
+  const newIgnorePerformers = await stashlist.getlist("ignorePerformer")
+  localStorage.setItem("ignorePerformer", newIgnorePerformers);
+  ignorePerformers = newIgnorePerformers;
+  const newIgnoreStudios = await stashlist.getlist("ignoreStudio");
+  localStorage.setItem("ignoreStudio", newIgnoreStudios);
+  ignoreStudios = newIgnoreStudios;
   console.log("synced to stashlist");
 }
 // navigation observer
