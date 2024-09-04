@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.4.0
+// @version      2.5.0
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -45,6 +45,11 @@ GM_addStyle(`
   --stashlist-history: plum;
   --stashlist-match: green;
   --stashlist-ignore-opacity: 0.3;
+  --stashlist-male: #89cff0;
+  --stashlist-female: #f38cac;
+  --stashlist-non_binary: #c8a2c8;
+  --stashlist-transgender_female: #c8a2c8;
+  --stashlist-transgender_male: #c8a2c8;
 }
 .stashlist {
   border: 5px solid transparent;
@@ -211,16 +216,30 @@ gqlListener.addEventListener("response", async (e) => {
   }
 });
 
+function borderColor(genderMatches) {
+  const emptyArr = new Array(4).fill("var(--stashlist-filter)");
+  // genderMatches array
+  const colorArr = genderMatches.map(gender => `var(--stashlist-${gender.toLowerCase()})`);
+  // fill empty array with colorArr
+  const filledArr = [...colorArr, ...emptyArr].slice(0, 4);
+  return filledArr.join(" ");
+}
+
 function scanGqlFilter(scenes) {
   for (const scene of scenes) {
-    const perfMatch = scene.performers.some((p) =>
-      ignorePerformers.includes(p.performer.id),
-    );
+    let perfMatches = false
+    let genderMatches = []
+    for (const performer of scene.performers) {
+      if (ignorePerformers.includes(performer.performer.id)) {
+        perfMatches = true;
+        genderMatches.push(performer.performer.gender)
+      }
+    }
     const studioMatch = ignoreStudios.includes(scene.studio.id);
-    if (perfMatch || studioMatch) {
+    if (perfMatches || studioMatch) {
       const sceneCard = document.querySelector(`[data-stash-id="${scene.id}"]`);
       sceneCard.classList.add("filter");
-      if (perfMatch) sceneCard.classList.add("performer");
+      if (perfMatches) sceneCard.style.borderColor = borderColor(genderMatches);
       if (studioMatch) sceneCard.classList.add("studio");
     }
   }
