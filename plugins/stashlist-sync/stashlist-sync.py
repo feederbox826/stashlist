@@ -41,7 +41,7 @@ stash = StashInterface(FRAGMENT_SERVER)
 
 config = stash.get_configuration()
 stashlist = config["plugins"]["stashlist-sync"]
-request_s.headers.update({"ApiKey": stashlist["stashlistApikey"]})
+request_s.headers.update({"ApiKey": stashlist["stashlist_apikey"]})
 
 if 'mode' in json_input['args']:
     PLUGIN_ARGS = json_input['args']["mode"]
