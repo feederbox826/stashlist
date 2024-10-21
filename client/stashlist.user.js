@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.5.0
+// @version      2.6.0
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -117,8 +117,45 @@ let selector = selectorObj.default;
 let ignorePerformers = localStorage.getItem("ignorePerformer")
 let ignoreStudios = localStorage.getItem("ignoreStudio")
 
+// event running and listeners
+gqlListener.addEventListener("response", async (e) => {
+  if (!ignorePerformers || !ignoreStudios) await setupStashlist();
+  if (e.detail.data.queryScenes) {
+    console.log("queryScenes received");
+    const scenes = e.detail.data.queryScenes.scenes;
+    wfke(".SceneCard.stashlist", () => scanGqlFilter(scenes));
+  } else if (e.detail.data.findScene) {
+    console.log("findScene received");
+    const scene = e.detail.data.findScene;
+    // check if studio or performers are ignored
+    wfke(".scene-info.card", () => {
+      scanGqlFilter([scene]);
+      markSingleCard(scene);
+    });
+  }
+});
+
 // helper functions
 const zip = (a, b) => a.map((k, i) => [k, b[i]]);
+
+const forceQuery = async (stashid) =>
+  fetch("/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `query ($id: ID!) {
+      findScene(id: $id) {
+        id
+        performers { performer {
+          id gender }}
+        studio { id }}}`,
+      variables: { id: stashid },
+    })
+  })
+  .then(response => response.json())
+  .then(data => data.data.findScene);
 
 // wait for visible key elements
 function wfke(selector, callback) {
@@ -169,7 +206,11 @@ async function queryLocalScenes(sceneIDs) {
     });
 }
 
-async function cacheLocal() {
+async function cacheLocalScenes(force=false) {
+  // check if already cached
+  const lastCache = localStorage.getItem("lastLocalCache");
+  // cache for 1h
+  if (!force && lastCache && Date.now() - lastCache < 1000 * 60 * 60) return;
   const query = `
       query FindScenes {
       findScenes( scene_filter: {
@@ -177,16 +218,15 @@ async function cacheLocal() {
       } filter: { per_page: -1 }
       ) { scenes { id stash_ids { stash_id }
   }}}`;
-  const idLocal = await gqlClient(localStash, query, {}).then(
+  const idMap = await gqlClient(localStash, query, {}).then(
     (data) => data.findScenes.scenes,
-  );
-  const idMap = idLocal.map((scene) => [scene.stash_ids[0].stash_id, scene.id]);
-  // sync to stashlist
+  ).then(scenes => scenes.map((scene) => [scene.stash_ids[0].stash_id, scene.id]))
   // clear
   await idbKeyval.clear();
   // add in bulk
   idbKeyval.setMany(idMap);
   console.log("syncing with local");
+  localStorage.setItem("lastLocalCache", Date.now());
 }
 
 function applyBulkMark(sceneIDs, type) {
@@ -197,24 +237,6 @@ function applyBulkMark(sceneIDs, type) {
     addRemoveButton(scene);
   });
 }
-
-// event running and listeners
-gqlListener.addEventListener("response", async (e) => {
-  if (!ignorePerformers || !ignoreStudios) await setupStashlist();
-  if (e.detail.data.queryScenes) {
-    console.log("queryScenes received");
-    const scenes = e.detail.data.queryScenes.scenes;
-    wfke(".SceneCard.stashlist", () => scanGqlFilter(scenes));
-  } else if (e.detail.data.findScene) {
-    console.log("findScene received");
-    const scene = e.detail.data.findScene;
-    // check if studio or performers are ignored
-    wfke(".scene-info.card", () => {
-      scanGqlFilter([scene]);
-      markSingleCard(scene);
-    });
-  }
-});
 
 function borderColor(genderMatches) {
   const emptyArr = new Array(4).fill("var(--stashlist-filter)");
@@ -229,19 +251,20 @@ function scanGqlFilter(scenes) {
   for (const scene of scenes) {
     let perfMatches = false
     let genderMatches = []
+    const studioMatch = ignoreStudios.includes(scene.studio.id);
     for (const performer of scene.performers) {
       if (ignorePerformers.includes(performer.performer.id)) {
         perfMatches = true;
         genderMatches.push(performer.performer.gender)
       }
     }
-    const studioMatch = ignoreStudios.includes(scene.studio.id);
+    const sceneCard = document.querySelector(`[data-stash-id="${scene.id}"]`);
     if (perfMatches || studioMatch) {
-      const sceneCard = document.querySelector(`[data-stash-id="${scene.id}"]`);
       sceneCard.classList.add("filter");
       if (perfMatches) sceneCard.style.borderColor = borderColor(genderMatches);
       if (studioMatch) sceneCard.classList.add("studio");
     }
+    sceneCard.classList.add("scanned")
   }
 }
 
@@ -283,7 +306,19 @@ function markScenes() {
       applyBulkMark(results.history, "history");
     })
     .then(() => queryLocalScenes(stashids));
+  // check for non-matches
+  const nonMatches = [...document.querySelectorAll(`${selectors.cards}:not(.scanned)`)]
+    .map((card) => card.attributes["data-stash-id"].value)
+    .map(id => parseNonMatch(id))
+  Promise.allSettled(nonMatches)
 }
+
+const parseNonMatch = (id) => forceQuery(id)
+  .then(scene => {
+    scanGqlFilter([scene]);
+    markSingleCard(scene);
+  })
+
 
 function addButton(scene, type, text, onclick) {
   // check for existing button
@@ -423,17 +458,21 @@ const keyListener = (e) => {
 function runPage() {
   console.log("runpage");
   setupPage();
-  cacheLocal();
+  cacheLocalScenes();
   wfke(selector.cards, markScenes);
   wfke("ul.pagination", observePerformers);
 }
-async function setupStashlist() {
+async function setupStashlist(force=false) {
+  const lastCache = localStorage.getItem("lastStashlistCache");
+  // cache for 1h
+  if (!force && lastCache && Date.now() - lastCache < 1000 * 60 * 60) return;
   const newIgnorePerformers = await stashlist.getlist("ignorePerformer")
   localStorage.setItem("ignorePerformer", newIgnorePerformers);
   ignorePerformers = newIgnorePerformers;
   const newIgnoreStudios = await stashlist.getlist("ignoreStudio");
   localStorage.setItem("ignoreStudio", newIgnoreStudios);
   ignoreStudios = newIgnoreStudios;
+  localStorage.setItem("lastStashlistCache", Date.now());
   console.log("synced to stashlist");
 }
 // navigation observer
