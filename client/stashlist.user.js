@@ -410,6 +410,7 @@ function ignoreStudioPerformer(e) {
   stashlist.add(id, type);
   e.target.textContent = "Ignored";
   e.target.disabled = true;
+  setupStashlist(true);
 }
 
 function clearStudioPerformer(e) {
@@ -418,6 +419,7 @@ function clearStudioPerformer(e) {
   stashlist.add(id, "remove");
   e.target.textContent = "Cleared";
   e.target.disabled = true;
+  setupStashlist(true);
 }
 
 function addIgnoreButton() {
