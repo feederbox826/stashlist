@@ -1,10 +1,13 @@
+// polyfill with GM_fetch if available
+let proxyFetch = GM_fetch ?? fetch;
+
 function gqlClient(instance, query, variables) {
     const options = {
         method: "POST",
         headers: { "ApiKey": instance.apikey, "Content-Type": "application/json" },
         body: JSON.stringify({ query, variables })
     };
-    return fetch(`${instance.host}/graphql`, options)
+    return proxyFetch(`${instance.host}/graphql`, options)
         .then(response => response.json())
         .then(data => data.data);
 }
@@ -14,14 +17,14 @@ function gqlClientCache(instance, query, variables) {
       headers: { "ApiKey": instance.apikey },
   };
   const params = new URLSearchParams({ query: query.replace(/\++/, "+"), variables: JSON.stringify(variables) })
-  return fetch(`${instance.host}?${params}`, options)
+  return proxyFetch(`${instance.host}?${params}`, options)
       .then(response => response.json())
       .then(data => data.data);
 }
 
 const stashlistClient = (method = "GET", path, overrides) => {
     const params = new URLSearchParams(overrides?.params ?? {});
-    return fetch(`${stashlist_server.host}${path}?${params}`, {
+    return proxyFetch(`${stashlist_server.host}${path}?${params}`, {
       method,
       headers: { "ApiKey": stashlist_server.apikey, "Content-Type": "application/json" },
       ...overrides
