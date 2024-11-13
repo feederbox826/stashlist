@@ -20,15 +20,16 @@ def processScene(s):
             return
 
 def syncall():
-    scenes=stash.find_scenes(f={"stash_id_endpoint":{"modifier":"NOT_NULL"}},filter={"per_page": -1})
-    count = len(scenes)
-    log.info(str(count)+' scenes to sync.')
-    ids = []
-    for scene in scenes:
-        for sid in scene['stash_ids']:
-            ids.append(sid['stash_id'])
+    sqlScenes = stash.sql_query(sql="SELECT stash_id FROM scene_stash_ids")
+    # https://stackoverflow.com/a/952952
+    scenes = [
+        x
+        for xs in sqlScenes['rows']
+        for x in xs
+    ]
+    log.info(str(len(scenes))+' scenes to sync.')
     # bulk submit
-    data = {"stashids": ids, "type": "history"}
+    data = {"stashids": scenes, "type": "history"}
     res = request_s.post(stashlist_endpoint + '/api/list/add/bulk', json=data)
     if res.status_code != 200:
         log.error('bulk submit failed')
