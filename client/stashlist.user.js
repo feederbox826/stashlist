@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.6.3
+// @version      2.6.4
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -14,7 +14,8 @@
 // @run-at       document-idle
 // @author       feederbox826
 // @licence      MIT
-// @require      https://raw.githubusercontent.com/feederbox826/userscripts/main/requires/gql-intercept.js
+// @require      https://feederbox.cc/uscript/requires/gql-intercept.js
+// @require      https://feederbox.cc/uscript/requires/wfke.js
 // @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
 // @require      https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js
 // @require      https://cdn.jsdelivr.net/npm/@trim21/gm-fetch
@@ -119,7 +120,7 @@ let ignorePerformers = localStorage.getItem("ignorePerformer")
 let ignoreStudios = localStorage.getItem("ignoreStudio")
 
 // event running and listeners
-gqlListener.addEventListener("response", async (e) => {
+unsafeWindow.fbox826.gqlListener.addEventListener("response", async (e) => {
   if (!ignorePerformers || !ignoreStudios) await setupStashlist();
   if (e.detail.data.queryScenes) {
     console.log("queryScenes received");
@@ -157,13 +158,6 @@ const forceQuery = async (stashid) =>
   })
   .then(response => response.json())
   .then(data => data.data.findScene);
-
-// wait for visible key elements
-function wfke(selector, callback) {
-  let el = document.querySelector(selector);
-  if (el) return callback();
-  setTimeout(wfke, 100, selector, callback);
-}
 
 const chooseSelector = () =>
   isSearch
@@ -262,7 +256,10 @@ function scanGqlFilter(scenes) {
     const sceneCard = document.querySelector(`[data-stash-id="${scene.id}"]`);
     if (perfMatches || studioMatch) {
       sceneCard.classList.add("filter");
-      if (perfMatches) sceneCard.style.borderColor = borderColor(genderMatches);
+      if (perfMatches) {
+          sceneCard.classList.add("performer");
+          sceneCard.style.borderColor = borderColor(genderMatches);
+      }
       if (studioMatch) sceneCard.classList.add("studio");
     }
     sceneCard.classList.add("scanned")
