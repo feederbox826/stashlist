@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.6.4
+// @version      2.6.5
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -61,6 +61,22 @@ GM_addStyle(`
 .stashlist.ignore {
   border-color: var(--stashlist-ignore);
 }
+
+.stashlist.match img {
+  opacity: 1 !important;
+}
+.stashlist.ignore img, .stashlist.history img, .stashlist.filter img {
+  opacity: var(--stashlist-ignore-opacity);
+}
+.stashlist.wish {
+  border-color: var(--stashlist-wish) !important;
+}
+.stashlist.history {
+  border-color: var(--stashlist-history) !important;
+}
+.scene-info.card a.scene-performer.filter {
+  color: var(--stashlist-ignore);
+}
 .stashlist.filter {
   border-color: var(--stashlist-filter);
   &.performer.studio {
@@ -76,21 +92,6 @@ GM_addStyle(`
   &.performer {
     border-style: dashed;
   }
-}
-.stashlist.match img {
-  opacity: 1 !important;
-}
-.stashlist.ignore img, .stashlist.history img, .stashlist.filter img {
-  opacity: var(--stashlist-ignore-opacity);
-}
-.stashlist.wish {
-  border-color: var(--stashlist-wish);
-}
-.stashlist.history {
-  border-color: var(--stashlist-history);
-}
-.scene-info.card a.scene-performer.filter {
-  color: var(--stashlist-ignore);
 }
 `);
 
