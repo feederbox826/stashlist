@@ -36,11 +36,14 @@ def syncall():
 json_input = json.loads(sys.stdin.read())
 
 # early exit
-if 'hookContext' in json_input['args']:
+if json_input['args'].has_attr('hookContext') and json_input['args']['hookContext']['input'].has_attr('stash_ids'):
     stashids = json_input['args']['hookContext']['input']['stash_ids']
     if not stashids:
         log.error('no stashid added')
         exit(0)
+else:
+    log.error('no stashid added')
+    exit(0)
 
 FRAGMENT_SERVER = json_input["server_connection"]
 stash = StashInterface(FRAGMENT_SERVER)
