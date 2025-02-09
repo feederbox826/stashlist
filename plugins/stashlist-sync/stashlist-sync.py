@@ -36,7 +36,7 @@ def syncall():
 json_input = json.loads(sys.stdin.read())
 
 # early exit
-if json_input['args'].has_attr('hookContext') and json_input['args']['hookContext']['input'].has_attr('stash_ids'):
+if 'hookContext' in json_input['args'] and 'stash_ids' in json_input['args']['hookContext']['input']:
     stashids = json_input['args']['hookContext']['input']['stash_ids']
     if not stashids:
         log.error('no stashid added')
