@@ -1,8 +1,21 @@
+import sys
+import json
+
+json_input = json.loads(sys.stdin.read())
+
+# early exit
+if 'hookContext' in json_input['args'] and 'stash_ids' in json_input['args']['hookContext']['input']:
+    stashids = json_input['args']['hookContext']['input']['stash_ids']
+    if not stashids:
+        log.debug('no stashid added')
+        exit(0)
+else:
+    log.debug('no stashid added')
+    exit(0)
+
+import requests
 import stashapi.log as log
 from stashapi.stashapp import StashInterface
-import sys
-import requests
-import json
 
 request_s = requests.Session()
 stashlist_endpoint = "https://list.feederbox.cc"
@@ -32,18 +45,6 @@ def syncall():
         log.error('bulk submit failed')
         log.error(res.text)
         return
-
-json_input = json.loads(sys.stdin.read())
-
-# early exit
-if 'hookContext' in json_input['args'] and 'stash_ids' in json_input['args']['hookContext']['input']:
-    stashids = json_input['args']['hookContext']['input']['stash_ids']
-    if not stashids:
-        log.error('no stashid added')
-        exit(0)
-else:
-    log.error('no stashid added')
-    exit(0)
 
 FRAGMENT_SERVER = json_input["server_connection"]
 stash = StashInterface(FRAGMENT_SERVER)
