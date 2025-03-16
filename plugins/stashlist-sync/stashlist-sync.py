@@ -8,8 +8,6 @@ if 'hookContext' in json_input['args'] and 'stash_ids' in json_input['args']['ho
     stashids = json_input['args']['hookContext']['input']['stash_ids']
     if not stashids:
         exit(0)
-else:
-    exit(0)
 
 import requests
 import stashapi.log as log
