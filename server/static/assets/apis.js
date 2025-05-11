@@ -1,5 +1,5 @@
 // polyfill with GM_fetch if available
-let proxyFetch = GM_fetch ?? fetch;
+let proxyFetch = window?.GM_fetch ?? window?.fetch;
 
 function gqlClient(instance, query, variables) {
     const options = {
