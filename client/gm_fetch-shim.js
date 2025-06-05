@@ -1,0 +1,1 @@
+if unsafeWindow?.GM_fetch { window.GM_fetch = unsafeWindow.GM_fetch }
