@@ -1,10 +1,6 @@
 // polyfill with GM_fetch if available
 let proxyFetch = window?.GM_fetch ?? window?.fetch;
-if (window?.GM_fetch) {
-  console.log("Using GM_fetch for proxy requests");
-} else {
-  console.log("Using window.fetch for proxy requests");
-}
+console.log(`[api] Using ${ window?.GM_fetch ? "GM_fetch ✅" : "window.fetch ❌" } for proxy requests`);
 
 function gqlClient(instance, query, variables) {
     const options = {

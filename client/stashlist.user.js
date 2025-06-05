@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.6.5
+// @version      2.7.0
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -14,16 +14,15 @@
 // @run-at       document-idle
 // @author       feederbox826
 // @licence      MIT
+// @require      https://feederbox.cc/uscript/requires/gm_fetch-shim.js
 // @require      https://feederbox.cc/uscript/requires/gql-intercept.js
 // @require      https://feederbox.cc/uscript/requires/wfke.js
 // @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
 // @require      https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js
-// @require      https://cdn.jsdelivr.net/npm/@trim21/gm-fetch
 // ==/UserScript==
 "use strict";
 
-// force polyfill
-unsafeWindow.GM_fetch = GM_fetch
+console.log(`[stashlist] Using ${ window?.GM_fetch ? "GM_fetch ✅" : "window.fetch ❌" } for proxy requests`);
 
 // configuration
 const stashlist_server = GM_getValue("stashlist_server", {
