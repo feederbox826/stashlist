@@ -30,6 +30,8 @@
     <input type="text" id="localstash_host" value="http://localhost:9999">
     <label for="localstash_apikey">local stash auth key</label>
     <input type="text" id="localstash_apikey" value="">
+    <label for="fetch-adapter">fetch adapter</label>
+    <input type="text" id="fetch-adapter" value="" placeholder="unknown" readonly disabled>
     <input type="button" id="save" value="Save" onclick="save_localstorage()">
   </pre>
   <script>
@@ -41,5 +43,10 @@
         alert("Saved!");
     }
     valueArr.forEach(name => load_input(name))
+
+    // populate fetch adapter
+    const fetchAdapter = document.getElementById("fetch-adapter");
+    fetchAdapter.value = window?.GM_fetch
+      ? "GM_fetch ✅" : "fetch"
   </script>
 </body></html>
