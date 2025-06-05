@@ -11,7 +11,7 @@
 // @run-at       document-idle
 // @author       feederbox826
 // @licence      MIT
-// @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
+// @require      https://cdn.jsdelivr.net/gh/feederbox826/stashlist/server/static/assets/apis.js
 // ==/UserScript==
 "use strict";
 

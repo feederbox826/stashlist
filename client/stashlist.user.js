@@ -17,7 +17,7 @@
 // @require      https://feederbox.cc/uscript/requires/gm_fetch-shim.js
 // @require      https://feederbox.cc/uscript/requires/gql-intercept.js
 // @require      https://feederbox.cc/uscript/requires/wfke.js
-// @require      https://raw.githubusercontent.com/feederbox826/stashlist/main/server/static/assets/apis.js
+// @require      https://cdn.jsdelivr.net/gh/feederbox826/stashlist/server/static/assets/apis.js
 // @require      https://cdn.jsdelivr.net/npm/idb-keyval@6/dist/umd.js
 // ==/UserScript==
 "use strict";
