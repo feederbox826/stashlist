@@ -5,7 +5,7 @@ json_input = json.loads(sys.stdin.read())
 
 # custom logger
 def logger(origin, msg, level='info'):
-    print(f"\001{level[0]}\002{origin}: {msg}")
+    print(f"\001{level[0]}\002{origin}: {msg}", file=sys.stderr)
 
 def log(msg, level='info'):
     logger("stashlist-sync", msg, level)
@@ -48,6 +48,9 @@ def syncall():
         log('bulk submit failed', 'error')
         log(res.text, 'error')
         return
+    log('bulk submit successful', 'info')
+    print("{}")
+    exit(0)
 
 FRAGMENT_SERVER = json_input["server_connection"]
 stash = StashInterface(FRAGMENT_SERVER)
