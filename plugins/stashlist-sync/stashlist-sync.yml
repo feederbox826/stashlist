@@ -1,6 +1,6 @@
 name: stashlist-sync
 description: Sync stashIDs to stashlist history
-version: 0.2.3
+version: 0.2.4
 url: https://github.com/feederbox826/stashlist
 exec:
   - python

@@ -10,12 +10,20 @@ def logger(origin, msg, level='info'):
 def log(msg, level='info'):
     logger("stashlist-sync", msg, level)
 
-# early exit
-if 'hookContext' in json_input['args'] and 'stash_ids' in json_input['args']['hookContext']['input']:
-    stashids = json_input['args']['hookContext']['input']['stash_ids']
-    if not stashids:
-        log('No stash_ids found in hookContext')
-        exit(0)
+# recursive extraction
+def extract(dict, keys):
+    for key in keys:
+        if dict is None:
+            return None
+        dict = dict.get(key, {})
+    return dict
+
+stashids = extract(json_input, ['args', 'hookContext', 'input', 'stash_ids'])
+if not stashids:
+    log('No stash_ids found in hookContext', 'error')
+    print("{}")
+    exit(0)
+
 
 import requests
 from stashapi.stashapp import StashInterface
