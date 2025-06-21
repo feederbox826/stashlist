@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         stashlist userscript
 // @namespace    feederbox
-// @version      2.7.0
+// @version      3.0.0
 // @description  Flag scenes in stashbox as ignore or wishlist, and show matches from local stashdb instance if available.
 // @match        https://stashdb.org/*
 // @connect      localhost:9999
@@ -29,11 +29,16 @@ const stashlist_server = GM_getValue("stashlist_server", {
   apikey: "xxxx",
   host: "https://list.feederbox.cc",
 });
-const localStash = GM_getValue("localStash", {
-  apikey: "",
-  host: "http://localhost:9999",
-});
-GM_setValue("example_key", { apikey: "xxxx", host: "" });
+const local_stashes = GM_getValue("localstashes",
+  [{
+    apikey: "xxxx",
+    host: "http://localhost:9999",
+  }]
+);
+// const localStash = GM_getValue("localStash", {
+//   apikey: "",
+//   host: "http://localhost:9999",
+// });
 
 // styling
 GM_addStyle(`
@@ -93,6 +98,9 @@ GM_addStyle(`
   }
 }
 `);
+
+// set up custom idbkeyval
+const localStashStore = idbKeyval.createStore("stashlist", "localstash")
 
 // initial setup
 const selectorObj = {
@@ -187,7 +195,7 @@ function setupPage() {
 // fetching functions
 async function queryLocalScenes(sceneIDs) {
   const otherClasses = ["ignore", "wish", "history", "filter"];
-  const localIDs = await idbKeyval.getMany(sceneIDs);
+  const localIDs = await idbKeyval.getMany(sceneIDs, localStashStore);
   zip(sceneIDs, localIDs)
     .filter((i) => i[1])
     .map((i) => {
@@ -213,14 +221,18 @@ async function cacheLocalScenes(force=false) {
       } filter: { per_page: -1 }
       ) { scenes { id stash_ids { stash_id }
   }}}`;
-  const idMap = await gqlClient(localStash, query, {}).then(
-    (data) => data.findScenes.scenes,
-  ).then(scenes => scenes.map((scene) => [scene.stash_ids[0].stash_id, scene.id]))
+  let idMap = [];
+  for (const localStash of local_stashes) {
+    console.log(`syncing with: ${localStash.host}`);
+    const newIDs = await gqlClient(localStash, query, {}).then(
+      (data) => data.findScenes.scenes,
+    ).then(scenes => scenes.map((scene) => [scene.stash_ids[0].stash_id, { id: scene.id, host: localStash.host }]));
+    idMap = [...idMap, ...newIDs];
+  }
   // clear
-  await idbKeyval.clear();
+  await idbKeyval.clear(localStashStore);
   // add in bulk
-  idbKeyval.setMany(idMap);
-  console.log("syncing with local");
+  idbKeyval.setMany(idMap, localStashStore);
   localStorage.setItem("lastLocalCache", Date.now());
 }
 
@@ -339,11 +351,11 @@ function addButton(scene, type, text, onclick) {
   }
 }
 
-function addMatch(scene, id) {
+function addMatch(scene, match) {
   const goToScene = (e) => {
     e.preventDefault();
     e.stopImmediatePropagation();
-    window.open(`${localStash.host}/scenes/${id}`);
+    window.open(`${match.host}/scenes/${match.id}`);
   };
   removeDefaultButtons(scene);
   addButton(scene, "match", "📂", goToScene);
