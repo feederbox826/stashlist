@@ -18,8 +18,10 @@ def extract(dict, keys):
         dict = dict.get(key, {})
     return dict
 
+MODE = extract(json_input, ['args', 'mode'])
+
 stashids = extract(json_input, ['args', 'hookContext', 'input', 'stash_ids'])
-if not stashids:
+if not stashids and not MODE:
     log('No stash_ids found in hookContext', 'error')
     print("{}")
     exit(0)
