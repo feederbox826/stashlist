@@ -30,7 +30,7 @@ function postAddBulkHandler(req: Request, h: ResponseToolkit) {
 const postAddBulkValidate = {
   payload: Joi.object({
     stashids: Joi.array()
-      .items(Joi.string().guid().required())
+      .items(Joi.string().guid({ version: [ 'uuidv4', 'uuidv7' ], seperator: '-'}).required())
       .required(),
     type: Joi.string()
       .valid(...listTypeKeyArr)
@@ -53,7 +53,7 @@ function postAddHandler(req: Request, h: ResponseToolkit) {
 }
 const postAddValidate = {
   query: Joi.object({
-    stashid: Joi.string().guid().required(),
+    stashid: Joi.string().guid({ version: [ 'uuidv4', 'uuidv7' ], seperator: '-'}).required(),
   }),
   params: Joi.object({
     type: Joi.string()
@@ -74,7 +74,7 @@ async function postFindBulkHandler(req: Request, h: ResponseToolkit) {
 const postFindBulkValidate = {
   payload: Joi.object({
     stashids: Joi.array()
-      .items(Joi.string().guid().required())
+      .items(Joi.string().guid({ version: [ 'uuidv4', 'uuidv7' ], seperator: '-'}).required())
       .required(),
   }),
 };
@@ -91,7 +91,7 @@ async function getFindHandler(req: Request, h: ResponseToolkit) {
 }
 const getFindValidate = {
   params: Joi.object({
-    id: Joi.string().guid().required(),
+    id: Joi.string().guid({ version: [ 'uuidv4', 'uuidv7' ], seperator: '-'}).required(),
   }),
 };
 // /:listtype - get list of type
