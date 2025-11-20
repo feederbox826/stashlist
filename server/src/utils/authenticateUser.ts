@@ -14,7 +14,7 @@ export function hapiValidateUser(server: object, options: ReqRefDefaults) {
       try {
         if (typeof apikey !== "string")
           throw new Error("Invalid ApiKey Format");
-        Joi.assert(apikey, Joi.string().guid({ version: 'uuidv4', seperator: '-'}).required());
+        Joi.assert(apikey, Joi.string().guid({ version: 'uuidv4' }).required());
       } catch (e) {
         throw unauthorized("Invalid ApiKey Format");
       }
