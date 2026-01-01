@@ -1,6 +1,6 @@
 name: stashlist-sync
 description: Sync stashIDs to stashlist history
-version: 0.2.4
+version: 0.3.0
 url: https://github.com/feederbox826/stashlist
 exec:
   - python
@@ -16,6 +16,10 @@ tasks:
     description: Sync all stashIDs to stashlist history
     defaultArgs:
       mode: syncall
+  - name: StashList StashDB Sync
+    description: Sync StashDB fingerprints to stashlist history
+    defaultArgs:
+      mode: sync_stashdb
 settings:
   stashlist_apikey:
     displayName: stashlist ApiKey
