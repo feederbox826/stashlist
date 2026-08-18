@@ -101,6 +101,7 @@ GM_addStyle(`
 
 // set up custom idbkeyval
 const localStashStore = idbKeyval.createStore("stashlist", "localstash")
+var stashlistSetup = false
 
 // initial setup
 const selectorObj = {
@@ -475,6 +476,8 @@ function runPage() {
   wfke("ul.pagination", observePerformers);
 }
 async function setupStashlist(force=false) {
+  if (stashlistSetup && !force) return;
+  stashlistSetup = true;
   const lastCache = localStorage.getItem("lastStashlistCache");
   // cache for 1h
   if (!force && lastCache && Date.now() - lastCache < 1000 * 60 * 60) return;
